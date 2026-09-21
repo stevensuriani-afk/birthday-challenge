@@ -63,6 +63,9 @@ body::before{
 }
 #wheelControls.hidden{display:none !important}
 #wheelControls .btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
+
+    /* Letter board: keep available letters high-contrast and easy to read. */
+    #alphabet button:not(:disabled) { color:#000 !important; }
 </style>
 </head>
 <body>
@@ -103,13 +106,12 @@ body::before{
   </div>
   <div style="max-width:690px;margin:0 auto;font-size:18px;line-height:1.6">
     <p>Each puzzle starts at <b>$0.00</b>. Build your winnings as you reveal letters.</p>
-    <p>For a <b>consonant</b>, click <b>SPIN</b>. The values keep spinning until you press <b>SPACE</b> to stop them, or they stop automatically after <b>30 seconds</b>. The spin can land on <b>25¢, 30¢, 50¢, 75¢, 💰 $1.00, 🎂 $2.00, or 😈 BANKRUPT</b>. Then type or click one consonant. If it appears, you win the spun amount <b>for each occurrence</b>. A missed consonant costs nothing.</p>
+    <p>This game is like Wheel of Fortune.</p>
+    <p>For a <b>consonant</b>, click <b>SPIN</b>. The values keep spinning until you press <b>SPACE</b> to stop them, or they stop automatically after <b>30 seconds</b>. The spin can land on <b>25¢, 30¢, 50¢, 75¢, 💰 $1.00, 🎂 $2.00, or 😈 BANKRUPT</b>. Then type or click one consonant. If it appears, you win the spun amount <b>for each occurrence</b>.</p>
       <p><b>Five incorrect consonants ends the puzzle with $0 earned.</b></p>
     <p>To guess a <b>vowel</b>, click <b>BUY A VOWEL — 25¢</b>. You must have at least 25¢ in the current puzzle. The 25¢ is charged when you buy the vowel, whether or not the vowel is in the puzzle.</p>
-    <p>After each consonant guess, spin again. After each vowel purchase, choose one vowel.</p>
     <p>You have <b>30 seconds between actions</b>.</p>
     <p>Think you know it? Click <b>SOLVE</b>. Once you do, you have <b>60 seconds</b> to enter the full solution.</p>
-    <p>If you reveal every letter, the puzzle is solved automatically.</p>
     <p><b>TEST MODE</b> works exactly like the real game, but the money doesn't count. Practice as long as you want. When you're ready, leave Test Mode and play for real birthday money.</p>
   </div>
   <div class="center space"><button id="beginPractice" class="btn" type="button">ENTER TEST MODE</button></div>
@@ -1240,11 +1242,7 @@ let cashOutReturnMode = null;
       "<p>Your official result has been sent to Aunt Georgia and Uncle Steve.</p>" +
       "<p><b>They owe you $" + bank.toFixed(2) + ".</b> 😎</p>";
     document.querySelector(".wrap").appendChild(finish);
-    if (bank >= 8.88) {
-      if (!happyAlreadyStarted) soundHappyBirthday();
-    } else {
-      soundFinal();
-    }
+    if (!happyAlreadyStarted) soundHappyBirthday();
     requestAnimationFrame(launchFireworks);
     reportResult();
   }
@@ -1396,7 +1394,7 @@ let cashOutReturnMode = null;
 
   $("#confirmCashOut").addEventListener("click", () => {
     $("#cashOutConfirm").classList.add("hidden");
-    const playHappy = soundOn && bank >= 8.88;
+    const playHappy = soundOn;
     if (playHappy) soundHappyBirthday();
     finishGame(playHappy);
   });
