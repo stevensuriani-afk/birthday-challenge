@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Birthday Challenge</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#17221c;background:#f3f1e8}
+*{box-sizing:border-box} body{margin:0;padding:24px}
+.wrap{max-width:920px;margin:auto}.card{background:white;border:1px solid #d6d3ca;border-radius:16px;padding:26px;box-shadow:0 8px 24px #00000012}
+.center{text-align:center}.hidden{display:none!important}h1{font-size:42px;margin:6px 0}.tag{font-size:20px;font-weight:800}.label{font-size:12px;font-weight:800;letter-spacing:.14em;color:#666}
+.input{width:min(360px,100%);font-size:20px;padding:13px;border:1px solid #aaa;border-radius:9px}.btn{font-size:16px;font-weight:800;padding:13px 22px;border:0;border-radius:9px;cursor:pointer;background:#1769e0;color:white}.space{margin-top:16px}.error{color:#b00020;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:16px}.bank,.money{font-size:40px;font-weight:900}.money{transition:.15s}.money.drop{color:#d92c2c;transform:scale(1.2)}
+.board{background:#123d2c;border:8px solid #263238;padding:36px 24px;border-radius:14px;min-height:250px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:22px}
+.word{display:inline-flex;gap:8px;white-space:nowrap}.tile{width:50px;height:66px;background:#f7f5ea;border:2px solid #d4d0c2;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:34px;font-weight:900}
+.prompt{margin-top:15px;padding:15px;text-align:center;background:white;border:1px solid #d6d3ca;border-radius:10px}.pulse{font-size:20px;font-weight:900}
+.alphabet{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.key{min-width:31px;height:31px;border:1px solid #bbb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;cursor:pointer;user-select:none}.key:hover{background:#eef4ff;border-color:#1769e0}
+.statusrow{display:flex;justify-content:space-between;gap:15px;margin-top:12px}.timers{margin-top:10px;text-align:center;font-size:18px;font-weight:900}.timers span{display:inline-block;margin:0 10px}.solve{margin-top:16px}.solve form{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.muted{color:#666}.result{margin-top:16px}
+@media(max-width:600px){h1{font-size:32px}.tile{width:27px;height:39px;font-size:18px}.word{gap:3px}.board{gap:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="header" class="top hidden">
+    <div><div class="label">BIRTHDAY BANK</div><div id="bank" class="bank">$0</div></div>
+    
+  </div>
+
+  <section id="welcome" class="card center">
+    <div style="font-size:50px">🎂💵</div>
+    <div class="label" style="font-size:16px;margin-top:8px">HAPPY BIRTHDAY SAM!</div>
+    <h1>BIRTHDAY CHALLENGE</h1>
+    <div class="tag">Solve puzzles. Win money.</div>
+    <p class="muted">Enter your first name to begin.</p>
+    <form id="nameForm">
+      <input id="playerName" class="input" maxlength="30" autocomplete="given-name" placeholder="First name">
+      <div class="space"><button type="submit" class="btn">CONTINUE</button></div>
+    </form>
+    <div id="nameError" class="error"></div>
+    <div style="font-size:11px;color:#888;margin-top:16px">TEST BUILD 3</div>
+  </section>
+
+  <section id="intro" class="card center hidden">
+    <div style="font-size:48px">🎯</div>
+    <h2>HOW TO PLAY</h2>
+    <p>First you'll get a practice puzzle worth no money.</p>
+    <p>Press <b>SPACE</b> to start a puzzle. Type letters to guess them. Press <b>SPACE</b> again when you're ready to solve.</p>
+    <p>Each puzzle starts at <b>$5.00</b>. Each new letter guess costs <b>25¢</b>.</p><p>You can <b>type a letter</b> on the keyboard or <b>click a letter</b> on the screen.</p><p>You have <b>20 seconds between guesses</b> and <b>4 minutes maximum</b> per puzzle. Press <b>SPACE</b> anytime to solve.</p><p>Start in <b>TEST MODE</b> and practice as long as you want. Test Mode winnings do not count. When you are ready, leave Test Mode and play for real birthday money.</p>
+    <button id="beginPractice" class="btn">BEGIN PRACTICE ROUND</button>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="top">
+      <div><div id="roundLabel" class="label"></div><div style="margin-top:10px;display:inline-flex;align-items:center;gap:10px;background:#fff;border:2px solid #123d2c;border-radius:9px;padding:8px 13px;box-shadow:0 2px 7px #00000012"><span class="label" style="color:#123d2c">CLUE</span><span id="clue" style="font-size:24px;font-weight:900"></span></div></div>
+      <div style="text-align:right"><div class="label">PUZZLE VALUE</div><div id="money" class="money">$0</div></div>
+    </div>
+    <div id="board" class="board"></div>
+    <div id="startPrompt" class="prompt"><div class="pulse">PRESS SPACE TO START</div><div id="startSub" class="muted"></div></div>
+    <div class="statusrow"><div><span class="muted">Guessed: </span><b id="guessed">—</b></div><b id="status"></b></div><div id="timers" class="timers hidden"><span>NEXT GUESS <b id="guessTimer">20</b>s</span><span>PUZZLE TIME <b id="puzzleTimer">4:00</b></span></div>
+    <div id="alphabet" class="alphabet"></div>
+
+    <div id="solvePanel" class="card solve center hidden">
+      <div class="label">LOCKED IN FOR</div><div id="locked" style="font-size:38px;font-weight:900">$0</div>
+      <form id="solveForm">
+        <input id="solution" class="input" autocomplete="off" placeholder="Type the complete answer">
+        <button class="btn" type="submit">SUBMIT ANSWER</button>
+      </form>
+    </div>
+    <div id="result" class="card result center hidden"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfdGabHVmtFi64L2DGITIogP9uiYRXWs_mpU1cTm5o7-Zw3om3pHtV2jrSfXmRLbS2cw/exec";
+  const testPuzzles = [
+    { clue: "PHRASE", answer: "BETTER LATE THAN NEVER" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN AND WAFFLES" },
+    { clue: "THING", answer: "WIRELESS HEADPHONES" },
+    { clue: "PHRASE", answer: "YOU ONLY LIVE ONCE" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE CHIP COOKIES" },
+    { clue: "THING", answer: "VIDEO GAME CONTROLLER" },
+    { clue: "PHRASE", answer: "READ BETWEEN THE LINES" },
+    { clue: "WHAT ARE YOU DOING?", answer: "SLEEPING IN LATE" }
+  ];
+
+  const paid = [
+    { clue: "PHRASE", answer: "THE BEST IS YET TO COME" },
+    { clue: "THING", answer: "NOISE-CANCELING HEADPHONES" },
+    { clue: "FOOD & DRINK", answer: "BUFFALO CHICKEN WINGS" },
+    { clue: "PHRASE", answer: "EASIER SAID THAN DONE" },
+    { clue: "THING", answer: "RECHARGEABLE BATTERY" },
+    { clue: "FOOD & DRINK", answer: "COOKIES AND CREAM" },
+    { clue: "PHRASE", answer: "IT'S NOT ROCKET SCIENCE" },
+    { clue: "THING", answer: "PAIR OF SUNGLASSES" },
+    { clue: "WHAT ARE YOU DOING?", answer: "ORDERING TAKEOUT" },
+    { clue: "PHRASE", answer: "THAT'S WHAT I'M TALKING ABOUT" },
+    { clue: "THING", answer: "PASSENGER SEAT" },
+    { clue: "FOOD & DRINK", answer: "LOADED BAKED POTATO" },
+    { clue: "PHRASE", answer: "KEEP YOUR EYES ON THE ROAD" },
+    { clue: "THING", answer: "REARVIEW MIRROR" },
+    { clue: "PHRASE", answer: "YOU'VE GOT TO BE KIDDING ME" },
+    { clue: "FOOD & DRINK", answer: "MACARONI AND CHEESE" },
+    { clue: "THING", answer: "PASSWORD RESET" },
+    { clue: "PHRASE", answer: "THE MORE THE MERRIER" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WATCHING A MOVIE" },
+    { clue: "FOOD & DRINK", answer: "PEANUT BUTTER AND JELLY" }
+  ];
+
+  const $ = (s) => document.querySelector(s);
+  let player = "";
+  let startedAt = "";
+  let bank = 0;
+  let solved = 0;
+  let attempted = 0;
+  let paidIndex = -1;
+  let testIndex = -1;
+  let current = null;
+  let isPractice = true;
+  let guessed = new Set();
+  let value = 0;
+  let timer = null;
+  let mode = "welcome";
+  let clockTimer = null;
+  let puzzleStartedMs = 0;
+  let lastActionMs = 0;
+
+  function normalizeAnswer(s) {
+    return s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (clockTimer) {
+      clearInterval(clockTimer);
+      clockTimer = null;
+    }
+  }
+
+  function updateHeader() {
+    $("#bank").textContent = "$" + bank.toFixed(2);
+    if ($("#solved")) $("#solved").textContent = String(solved);
+  }
+
+  function renderBoard(showAll) {
+    const board = $("#board");
+    board.innerHTML = "";
+    current.answer.split(" ").forEach((wordText) => {
+      const word = document.createElement("span");
+      word.className = "word";
+      for (const ch of wordText) {
+        const tile = document.createElement("span");
+        tile.className = "tile";
+        if (/[A-Z]/.test(ch)) {
+          tile.textContent = (showAll || guessed.has(ch)) ? ch : "";
+        } else {
+          tile.textContent = ch;
+        }
+        word.appendChild(tile);
+      }
+      board.appendChild(word);
+    });
+  }
+
+  function renderAlphabet() {
+    const el = $("#alphabet");
+    el.innerHTML = "";
+    for (const letter of "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+      if (guessed.has(letter)) continue;
+      const key = document.createElement("span");
+      key.className = "key";
+      key.textContent = letter;
+      key.addEventListener("click", () => {
+        if (mode === "playing") guessLetter(letter);
+      });
+      el.appendChild(key);
+    }
+  }
+
+  function loadPuzzle(practiceMode) {
+    stopTimer();
+    isPractice = practiceMode;
+    if (practiceMode) {
+      testIndex = (testIndex + 1) % testPuzzles.length;
+      current = testPuzzles[testIndex];
+    } else {
+      paidIndex = (paidIndex + 1) % paid.length;
+      current = paid[paidIndex];
+    }
+    value = 5;
+    guessed = new Set();
+    mode = "waiting";
+    $("#roundLabel").textContent = practiceMode ? "TEST MODE — WINNINGS DO NOT COUNT" : "BIRTHDAY MONEY ROUND";
+    $("#clue").textContent = current.clue;
+    $("#money").textContent = "$5.00";
+    $("#money").classList.remove("drop");
+    $("#guessed").textContent = "—";
+    $("#status").textContent = "Waiting to start";
+    $("#startSub").textContent = practiceMode
+      ? "Practice rules are exactly the same. Press SPACE to start."
+      : "Press SPACE to start. Type or click letters. You have 20 seconds between guesses and 4 minutes total.";
+    $("#startPrompt").classList.remove("hidden");
+    $("#timers").classList.add("hidden");
+    $("#solvePanel").classList.add("hidden");
+    $("#result").classList.add("hidden");
+    $("#game").classList.remove("hidden");
+    renderBoard(false);
+    renderAlphabet();
+  }
+
+  function formatPuzzleTime(secondsLeft) {
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    return m + ":" + String(s).padStart(2, "0");
+  }
+
+  function flashValue() {
+    const money = $("#money");
+    money.classList.remove("drop");
+    void money.offsetWidth;
+    money.classList.add("drop");
+    setTimeout(() => money.classList.remove("drop"), 650);
+  }
+
+  function timeUp(reason) {
+    if (mode !== "playing") return;
+    stopTimer();
+    mode = "result";
+    value = 0;
+    $("#money").textContent = "$0.00";
+    $("#timers").classList.add("hidden");
+    renderBoard(true);
+    showResult(
+      "<div style=\"font-size:40px\">⏰</div><h2>TIME'S UP!</h2>" +
+      "<p>" + reason + "</p>" +
+      "<p>The answer was <b>" + current.answer + "</b>.</p>" +
+      (isPractice
+        ? "<p>Practice value: <b>$0</b> — this does not count.</p>"
+        : "<p><b>$0</b> added to your Birthday Bank.</p>") +
+      (isPractice
+        ? '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> <button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+        : nextButton("NEXT PUZZLE"))
+    );
+    $("#nextButton").addEventListener("click", () => {
+      if (isPractice) loadPuzzle(true);
+      else loadPuzzle(false);
+    });
+    if (isPractice && $("#realButton")) {
+      $("#realButton").addEventListener("click", () => loadPuzzle(false));
+    }
+  }
+
+  function updateTimers() {
+    if (mode !== "playing") return;
+    const now = Date.now();
+    const guessElapsed = Math.floor((now - lastActionMs) / 1000);
+    const puzzleElapsed = Math.floor((now - puzzleStartedMs) / 1000);
+    const guessLeft = Math.max(0, 20 - guessElapsed);
+    const puzzleLeft = Math.max(0, 240 - puzzleElapsed);
+    $("#guessTimer").textContent = String(guessLeft);
+    $("#puzzleTimer").textContent = formatPuzzleTime(puzzleLeft);
+    if (puzzleElapsed >= 240) {
+      timeUp("The 4-minute puzzle limit expired.");
+    } else if (guessElapsed >= 20) {
+      timeUp("20 seconds passed without a guess or solve attempt.");
+    }
+  }
+
+  function startPuzzle() {
+    if (mode !== "waiting") return;
+    mode = "playing";
+    if (!isPractice) attempted += 1;
+    $("#startPrompt").classList.add("hidden");
+    $("#status").textContent = "TYPE OR CLICK A LETTER • HIT SPACE TO SOLVE";
+    puzzleStartedMs = Date.now();
+    lastActionMs = puzzleStartedMs;
+    $("#timers").classList.remove("hidden");
+    $("#guessTimer").textContent = "20";
+    $("#puzzleTimer").textContent = "4:00";
+    clockTimer = setInterval(updateTimers, 250);
+  }
+
+  function guessLetter(letter) {
+    if (mode !== "playing" || guessed.has(letter)) return;
+    guessed.add(letter);
+    value = Math.max(0, Math.round((value - 0.25) * 100) / 100);
+    $("#money").textContent = "$" + value.toFixed(2);
+    flashValue();
+    lastActionMs = Date.now();
+    $("#guessed").textContent = Array.from(guessed).join("  ");
+    renderAlphabet();
+    renderBoard(false);
+    $("#status").textContent = current.answer.includes(letter) ? "✓ " + letter + " is in the puzzle" : "✕ No " + letter;
+
+    const allLettersRevealed = Array.from(current.answer)
+      .filter(ch => /[A-Z]/.test(ch))
+      .every(ch => guessed.has(ch));
+
+    if (allLettersRevealed) {
+      stopTimer();
+      mode = "result";
+      $("#timers").classList.add("hidden");
+      renderBoard(true);
+
+      if (isPractice) {
+        showResult(
+          '<div style="font-size:40px">✅</div><h2>TEST PUZZLE COMPLETE!</h2>' +
+          '<p>You revealed every letter.</p>' +
+          "<p>Practice value: <b>$" + value.toFixed(2) + "</b> — this does not count.</p>" +
+          '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> ' +
+          '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+        );
+      } else {
+        bank += value;
+        solved += 1;
+        updateHeader();
+        const done = bank >= 40;
+        showResult(
+          '<div style="font-size:40px">🎉</div><h2>PUZZLE COMPLETE!</h2>' +
+          '<p>You revealed every letter and automatically solved the puzzle.</p>' +
+          "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
+          "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
+          nextButton(done ? "CONTINUE" : "NEXT PUZZLE")
+        );
+      }
+
+      $("#nextButton").addEventListener("click", () => {
+        if (isPractice) loadPuzzle(true);
+        else if (bank >= 40) finishGame();
+        else loadPuzzle(false);
+      });
+      if (isPractice && $("#realButton")) {
+        $("#realButton").addEventListener("click", () => loadPuzzle(false));
+      }
+      return;
+    }
+
+    if (value <= 0) {
+      timeUp("The puzzle value reached $0.");
+    }
+  }
+
+  function enterSolveMode() {
+    if (mode !== "playing") return;
+    stopTimer();
+    mode = "solve";
+    $("#timers").classList.add("hidden");
+    $("#locked").textContent = "$" + value.toFixed(2);
+    $("#solvePanel").classList.remove("hidden");
+    $("#status").textContent = "Locked — type the full answer";
+    $("#solution").value = "";
+    $("#solution").focus();
+  }
+
+  function showResult(html) {
+    $("#result").innerHTML = html;
+    $("#result").classList.remove("hidden");
+  }
+
+  function nextButton(label) {
+    return '<button id="nextButton" class="btn" type="button">' + label + "</button>";
+  }
+
+  async function reportResult() {
+    const payload = {
+      player: player,
+      started: startedAt,
+      finished: new Date().toISOString(),
+      winnings: bank,
+      attempted: attempted,
+      solved: solved
+    };
+    try {
+      await fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("Result reporting failed:", err);
+    }
+  }
+
+  function finishGame() {
+    stopTimer();
+    mode = "finished";
+    $("#game").classList.add("hidden");
+    $("#header").classList.add("hidden");
+    const finish = document.createElement("section");
+    finish.className = "card center";
+    finish.innerHTML =
+      '<div style="font-size:58px">🎂🎉💵</div>' +
+      "<h1>HAPPY 17TH BIRTHDAY, SAM!</h1>" +
+      '<div class="muted">Your final Birthday Challenge winnings are</div>' +
+      '<div style="font-size:64px;font-weight:900;margin:10px">$' + bank.toFixed(2) + "</div>" +
+      "<p>Your official result has been sent to Uncle Steve.</p>" +
+      "<p><b>He owes you $" + bank.toFixed(2) + ".</b> 😎</p>";
+    document.querySelector(".wrap").appendChild(finish);
+    reportResult();
+  }
+
+  $("#nameForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("#playerName").value.trim();
+    if (!name) {
+      $("#nameError").textContent = "Please enter your first name.";
+      $("#playerName").focus();
+      return;
+    }
+    player = name;
+    startedAt = new Date().toISOString();
+    $("#welcome").classList.add("hidden");
+    $("#intro").classList.remove("hidden");
+  });
+
+  $("#beginPractice").addEventListener("click", () => {
+    $("#intro").classList.add("hidden");
+    $("#header").classList.remove("hidden");
+    loadPuzzle(true);
+  });
+
+  $("#solveForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (mode !== "solve") return;
+    const correct = normalizeAnswer($("#solution").value) === normalizeAnswer(current.answer);
+    mode = "result";
+    $("#solvePanel").classList.add("hidden");
+    renderBoard(true);
+
+    if (isPractice) {
+      const msg = correct
+        ? '<div style="font-size:40px">✅</div><h2>CORRECT!</h2><p>Practice value: <b>$' + value.toFixed(2) + '</b> — this does not count.</p>'
+        : '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2><p>The answer was <b>' + current.answer + "</b>.</p><p>Practice value: $0 — this does not count.</p>";
+      showResult(
+        msg +
+        '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> ' +
+        '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+      );
+    } else if (correct) {
+      bank += value;
+      solved += 1;
+      updateHeader();
+      const done = bank >= 40;
+      showResult(
+        '<div style="font-size:40px">🎉</div><h2>CORRECT!</h2>' +
+        "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
+        "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
+        nextButton(done ? "CONTINUE" : "NEXT PUZZLE")
+      );
+    } else {
+      showResult(
+        '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2>' +
+        "<p>The answer was <b>" + current.answer + "</b>.</p>" +
+        "<p>$0 banked. Birthday Bank stays at <b>$" + bank + "</b>.</p>" +
+        nextButton("NEXT PUZZLE")
+      );
+    }
+
+    $("#nextButton").addEventListener("click", () => {
+      if (isPractice) {
+        loadPuzzle(false);
+      } else if (bank >= 40) {
+        finishGame();
+      } else {
+        loadPuzzle(false);
+      }
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.target && e.target.tagName === "INPUT") return;
+    if (e.code === "Space") {
+      e.preventDefault();
+      if (mode === "waiting") startPuzzle();
+      else if (mode === "playing") enterSolveMode();
+      return;
+    }
+    if (mode === "playing" && /^[a-zA-Z]$/.test(e.key)) {
+      e.preventDefault();
+      guessLetter(e.key.toUpperCase());
+    }
+  });
+
+  updateHeader();
+})();
+</script>
+</body>
+</html>
