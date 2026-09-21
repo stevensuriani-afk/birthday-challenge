@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Birthday Challenge</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#17221c;background:#f3f1e8}
+*{box-sizing:border-box} body{margin:0;padding:24px}
+.wrap{max-width:920px;margin:auto}.card{background:white;border:1px solid #d6d3ca;border-radius:16px;padding:26px;box-shadow:0 8px 24px #00000012}
+.center{text-align:center}.hidden{display:none!important}h1{font-size:42px;margin:6px 0}.tag{font-size:20px;font-weight:800}.label{font-size:12px;font-weight:800;letter-spacing:.14em;color:#666}
+.input{width:min(360px,100%);font-size:20px;padding:13px;border:1px solid #aaa;border-radius:9px}.btn{font-size:16px;font-weight:800;padding:13px 22px;border:0;border-radius:9px;cursor:pointer;background:#1769e0;color:white}.space{margin-top:16px}.error{color:#b00020;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:16px}.bank,.money{font-size:40px;font-weight:900}.money{transition:.15s}.money.drop{color:#d92c2c;transform:scale(1.2)}
+.board{background:#123d2c;border:8px solid #263238;padding:36px 24px;border-radius:14px;min-height:250px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:22px}
+.word{display:inline-flex;gap:8px;white-space:nowrap}.tile{width:50px;height:66px;background:#f7f5ea;border:2px solid #d4d0c2;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:34px;font-weight:900}
+.prompt{margin-top:15px;padding:15px;text-align:center;background:white;border:1px solid #d6d3ca;border-radius:10px}.pulse{font-size:20px;font-weight:900}
+.alphabet{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.alphabet-row{display:flex;justify-content:center;gap:6px;flex-wrap:nowrap}.key{min-width:31px;height:31px;border:1px solid #bbb;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;cursor:pointer;user-select:none}.key:hover{background:#eef4ff;border-color:#1769e0}
+.statusrow{display:flex;justify-content:space-between;gap:15px;margin-top:12px}.timers{margin-top:10px;text-align:center;font-size:18px;font-weight:900}.timers span{display:inline-block;margin:0 10px}.solve{margin-top:16px}.solve form{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.muted{color:#666}.result{margin-top:16px}
+@media(max-width:600px){h1{font-size:32px}.tile{width:27px;height:39px;font-size:18px}.word{gap:3px}.board{gap:10px}}
+
+/* Light birthday/game-show backdrop */
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(255,255,255,.75) 0 2px, transparent 3px),
+    radial-gradient(circle at 88% 22%, rgba(255,255,255,.60) 0 3px, transparent 4px),
+    radial-gradient(circle at 18% 82%, rgba(255,255,255,.55) 0 2px, transparent 3px),
+    radial-gradient(circle at 82% 78%, rgba(255,255,255,.50) 0 2px, transparent 3px),
+    linear-gradient(135deg, #eaf7ff 0%, #d7efff 38%, #c8e8fb 68%, #b9ddf5 100%);
+  background-attachment:fixed;
+  position:relative;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 25% 10%, rgba(255,255,255,.55), transparent 22%),
+    radial-gradient(circle at 78% 18%, rgba(255,255,255,.40), transparent 20%),
+    radial-gradient(circle at 50% 100%, rgba(77,166,219,.10), transparent 30%);
+  z-index:-1;
+}
+.wrap{position:relative;z-index:1;}
+.card{
+  box-shadow:0 14px 36px rgba(0,0,0,.14);
+}
+</style>
+</head>
+<body>
+<button id="soundToggle" type="button" title="Toggle sound" style="position:fixed;right:16px;top:16px;z-index:1000;border:1px solid #bbb;border-radius:9px;background:#fff;padding:8px 11px;font-weight:800;cursor:pointer">🔊 SOUND ON</button>
+<div class="wrap">
+  <div id="header" class="top hidden">
+    <div><div class="label">BIRTHDAY BANK</div><div id="bank" class="bank">$0</div></div>
+    
+  </div>
+
+  <section id="startScreen" class="card center">
+    <div style="font-size:64px">🎂🎉💵</div>
+    <h1>BIRTHDAY CHALLENGE</h1>
+    <div class="tag">HAPPY 17<span style="text-transform:lowercase">th</span> BIRTHDAY, SAM!</div>
+    <p style="font-size:24px;font-weight:900;margin-top:34px">PRESS SPACE BAR TO BEGIN</p>
+  </section>
+
+  <section id="welcome" class="card center hidden">
+    <div style="font-size:50px">🎂💵</div>
+    <div class="label" style="font-size:16px;margin-top:8px">HAPPY BIRTHDAY SAM!</div>
+    <h1>BIRTHDAY CHALLENGE</h1>
+    <div class="tag">Solve puzzles. Win money.</div>
+    <p class="muted">Enter your first name to begin.</p>
+    <form id="nameForm">
+      <input id="playerName" class="input" maxlength="30" autocomplete="given-name" placeholder="First name">
+      <div class="space"><button type="submit" class="btn">CONTINUE</button></div>
+    </form>
+    <div id="nameError" class="error"></div>
+  </section>
+
+  <section id="intro" class="card hidden">
+  <div class="center">
+    <div style="font-size:44px">🎯</div>
+    <h2 style="margin-bottom:8px">HOW TO PLAY</h2>
+  </div>
+  <div style="max-width:690px;margin:0 auto;font-size:18px;line-height:1.6">
+    <p>Each puzzle starts at <b>$5.00</b>.</p>
+    <p><b>Type a letter</b> on your keyboard or <b>click a letter</b> on the screen.</p>
+    <p>Each <b>consonant</b> you guess reduces the puzzle value by <b>10¢</b>. Each <b>vowel</b> reduces it by <b>30¢</b>.</p>
+    <p>You have <b>20 seconds between guesses</b> and <b>4 minutes total</b> for each puzzle.</p>
+    <p>Think you know it? <b>Press SPACE to solve.</b></p>
+    <p>If you reveal every letter, the puzzle is solved automatically.</p>
+    <p><b>TEST MODE</b> works exactly like the real game, but the money doesn't count. Practice as long as you want. When you're ready, leave Test Mode and play for real birthday money.</p>
+    <p>During the real game, press <b>Ctrl + Shift + C</b> if you want to cash out your Birthday Bank and end the game.</p>
+  </div>
+  <div class="center space"><button id="beginPractice" class="btn" type="button">ENTER TEST MODE</button></div>
+</section>
+
+  <section id="cashOutConfirm" class="card center hidden">
+  <div style="font-size:48px">💵</div>
+  <h2>CASH OUT?</h2>
+  <p>Your Birthday Bank is <b id="cashOutAmount">$0.00</b>.</p>
+  <p>If you cash out, the game ends and this becomes your final birthday winnings.</p>
+  <div class="space" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button id="keepPlaying" class="btn" type="button">KEEP PLAYING</button>
+    <button id="confirmCashOut" class="btn" type="button">CASH OUT</button>
+  </div>
+</section>
+
+<section id="realConfirm" class="card center hidden">
+  <div style="font-size:48px">💵</div>
+  <h2>READY TO PLAY FOR REAL?</h2>
+  <div style="max-width:650px;margin:0 auto;font-size:20px;line-height:1.55">
+    <p>Once you choose to play for real, <b>you can't go back to Test Mode.</b></p>
+    <p>The puzzles you play next will determine <b>how much birthday money you win.</b></p>
+    <p>Practice as much as you want before continuing.</p>
+  </div>
+  <div class="space" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button id="backToTest" class="btn" type="button">BACK TO TEST MODE</button>
+    <button id="confirmReal" class="btn" type="button">PLAY FOR REAL MONEY</button>
+  </div>
+  <div id="passwordPanel" class="hidden" style="max-width:420px;margin:22px auto 0;padding-top:18px;border-top:1px solid #ddd">
+    <div style="font-size:18px;font-weight:900;margin-bottom:10px">PASSWORD REQUIRED</div>
+    <p class="muted" style="margin-top:0">Enter the password to begin the real-money game.</p>
+    <form id="passwordForm">
+      <input id="realPassword" class="input" type="password" autocomplete="off" placeholder="Password">
+      <div class="space"><button class="btn" type="submit">CONTINUE</button></div>
+    </form>
+    <div id="passwordError" class="error"></div>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+    <div class="top">
+      <div><div id="roundLabel" class="label"></div><div style="margin-top:10px;display:inline-flex;align-items:center;gap:10px;background:#fff;border:2px solid #123d2c;border-radius:9px;padding:8px 13px;box-shadow:0 2px 7px #00000012"><span class="label" style="color:#123d2c">CLUE</span><span id="clue" style="font-size:24px;font-weight:900"></span></div></div>
+      <div style="text-align:right"><div class="label">PUZZLE VALUE</div><div id="money" class="money">$0</div></div>
+    </div>
+    <div id="board" class="board"></div>
+      <div style="text-align:center;margin-top:12px;font-size:18px;font-weight:900;color:#123d2c">HIT SPACE TO SOLVE</div>
+    <div id="startPrompt" class="prompt"><div class="pulse">PRESS SPACE TO START</div><div id="startSub" class="muted"></div></div>
+    <div class="statusrow"><div><span class="muted">Guessed: </span><b id="guessed">—</b></div><b id="status"></b></div><div id="timers" class="timers hidden"><span>NEXT GUESS <b id="guessTimer">20</b>s</span><span>PUZZLE TIME <b id="puzzleTimer">4:00</b></span></div>
+    <div id="alphabet" class="alphabet"></div>
+
+    <div id="solvePanel" class="card solve center hidden">
+      <div class="label">LOCKED IN FOR</div><div id="locked" style="font-size:38px;font-weight:900">$0</div>
+      <form id="solveForm">
+        <input id="solution" class="input" autocomplete="off" placeholder="Type the complete answer">
+        <button class="btn" type="submit">SUBMIT ANSWER</button>
+      </form>
+    </div>
+    <div id="result" class="card result center hidden"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfdGabHVmtFi64L2DGITIogP9uiYRXWs_mpU1cTm5o7-Zw3om3pHtV2jrSfXmRLbS2cw/exec";
+  let soundOn = true;
+  let audioCtx = null;
+  let lastCountdownBeep = null;
+  function getAudioCtx(){if(!soundOn)return null;if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume();return audioCtx;}
+  function tone(freq,duration=.10,volume=.055,type="sine",delay=0){const ctx=getAudioCtx();if(!ctx)return;const start=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,start);gain.gain.setValueAtTime(.0001,start);gain.gain.exponentialRampToValueAtTime(volume,start+.008);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);osc.connect(gain);gain.connect(ctx.destination);osc.start(start);osc.stop(start+duration+.02);}
+  function soundCorrectLetter(){tone(660,.07,.045);tone(880,.08,.04,"sine",.055);}
+  function soundWrongLetter(){tone(180,.09,.035,"square");}
+  function soundSolve(){tone(523,.11,.05);tone(659,.11,.05,"sine",.10);tone(784,.18,.055,"sine",.20);}
+  function soundWrongSolve(){tone(260,.12,.04,"sawtooth");tone(190,.20,.04,"sawtooth",.11);}
+  function soundTimeout(){tone(150,.42,.055,"square");}
+  function soundTick(){tone(900,.045,.025);}
+  function soundFinal(){[523,659,784,1047].forEach((f,i)=>tone(f,i===3?.35:.14,.055,"sine",i*.12));}
+  let entertainerTimer = null;
+  let entertainerPlaying = false;
+
+  function playEntertainerPhrase(){
+    if (!soundOn || !entertainerPlaying) return;
+    // Short synthesized opening-style phrase from Scott Joplin's public-domain rag.
+    const q=.16;
+    const notes=[
+      [587,.5],[622,.5],[659,.5],[784,.5],[659,.5],[784,.5],[659,.5],
+      [523,.5],[587,.5],[622,.5],[659,.5],[784,.5],[659,.5],[784,.5],
+      [880,.5],[831,.5],[784,.5],[659,.5],[587,.5],[659,.5],[523,1],
+      [587,.5],[622,.5],[659,.5],[784,.5],[659,.5],[784,.5],[659,.5],
+      [523,.5],[587,.5],[622,.5],[659,.5],[784,.5],[659,.5],[784,.5],
+      [880,.5],[831,.5],[784,.5],[659,.5],[587,.5],[523,1]
+    ];
+    let t=0;
+    notes.forEach(([f,b])=>{
+      tone(f, Math.max(.06,q*b*.86), .027, "triangle", t);
+      t += q*b;
+    });
+    entertainerTimer=setTimeout(playEntertainerPhrase,(t+1.1)*1000);
+  }
+
+  function startEntertainer(){
+    if (entertainerPlaying) return;
+    entertainerPlaying=true;
+    playEntertainerPhrase();
+  }
+
+  function stopEntertainer(){
+    entertainerPlaying=false;
+    if (entertainerTimer) clearTimeout(entertainerTimer);
+    entertainerTimer=null;
+  }
+
+  function soundHappyBirthday(){
+    if (!soundOn) return;
+    // Instrumental "Happy Birthday to You" melody in C major.
+    const q=.24;
+    const notes=[
+      [392,.75],[392,.25],[440,1],[392,1],[523,1],[494,2],
+      [392,.75],[392,.25],[440,1],[392,1],[587,1],[523,2],
+      [392,.75],[392,.25],[784,1],[659,1],[523,1],[494,1],[440,2],
+      [698,.75],[698,.25],[659,1],[523,1],[587,1],[523,2]
+    ];
+    let t=0;
+    notes.forEach(([f,b])=>{
+      tone(f, Math.max(.09,q*b*.88), .045, "triangle", t);
+      t += q*b;
+    });
+  }
+
+  const easyPuzzles = [
+    { clue: "PHRASE", answer: "BETTER SAFE THAN SORRY", difficulty: "easy" },
+    { clue: "PHRASE", answer: "EASY DOES IT", difficulty: "easy" },
+    { clue: "PHRASE", answer: "JUST IN TIME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "ONE STEP AT A TIME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "THE BEST IS YET TO COME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "KEEP IT SIMPLE", difficulty: "easy" },
+    { clue: "PHRASE", answer: "TAKE YOUR TIME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "GOOD AS NEW", difficulty: "easy" },
+    { clue: "PHRASE", answer: "A PIECE OF CAKE", difficulty: "easy" },
+    { clue: "PHRASE", answer: "HANG IN THERE", difficulty: "easy" },
+    { clue: "PHRASE", answer: "SO FAR SO GOOD", difficulty: "easy" },
+    { clue: "PHRASE", answer: "READY SET GO", difficulty: "easy" },
+    { clue: "PHRASE", answer: "HAVE A NICE DAY", difficulty: "easy" },
+    { clue: "PHRASE", answer: "SEE YOU LATER", difficulty: "easy" },
+    { clue: "PHRASE", answer: "THAT SOUNDS GOOD", difficulty: "easy" },
+    { clue: "PHRASE", answer: "YOU GOT THIS", difficulty: "easy" },
+    { clue: "PHRASE", answer: "WHAT A GREAT IDEA", difficulty: "easy" },
+    { clue: "PHRASE", answer: "IT'S ALL GOOD", difficulty: "easy" },
+    { clue: "PHRASE", answer: "RIGHT ON TIME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "THE MORE THE MERRIER", difficulty: "easy" },
+    { clue: "PHRASE", answer: "FIRST THINGS FIRST", difficulty: "easy" },
+    { clue: "PHRASE", answer: "NO WORRIES", difficulty: "easy" },
+    { clue: "PHRASE", answer: "JUST FOR FUN", difficulty: "easy" },
+    { clue: "PHRASE", answer: "MAKE YOURSELF AT HOME", difficulty: "easy" },
+    { clue: "PHRASE", answer: "BACK IN BUSINESS", difficulty: "easy" },
+    { clue: "THING", answer: "WIRELESS HEADPHONES", difficulty: "easy" },
+    { clue: "THING", answer: "VIDEO GAME CONTROLLER", difficulty: "easy" },
+    { clue: "THING", answer: "CELL PHONE CHARGER", difficulty: "easy" },
+    { clue: "THING", answer: "PAIR OF SUNGLASSES", difficulty: "easy" },
+    { clue: "THING", answer: "BASEBALL CAP", difficulty: "easy" },
+    { clue: "THING", answer: "WATER BOTTLE", difficulty: "easy" },
+    { clue: "THING", answer: "BACKPACK", difficulty: "easy" },
+    { clue: "THING", answer: "CAR KEYS", difficulty: "easy" },
+    { clue: "THING", answer: "COFFEE MUG", difficulty: "easy" },
+    { clue: "THING", answer: "REMOTE CONTROL", difficulty: "easy" },
+    { clue: "THING", answer: "TOOTHBRUSH", difficulty: "easy" },
+    { clue: "THING", answer: "LAPTOP COMPUTER", difficulty: "easy" },
+    { clue: "THING", answer: "BASKETBALL HOOP", difficulty: "easy" },
+    { clue: "THING", answer: "GUITAR PICK", difficulty: "easy" },
+    { clue: "THING", answer: "PHONE CASE", difficulty: "easy" },
+    { clue: "THING", answer: "ALARM CLOCK", difficulty: "easy" },
+    { clue: "THING", answer: "DESK LAMP", difficulty: "easy" },
+    { clue: "THING", answer: "PARKING TICKET", difficulty: "easy" },
+    { clue: "THING", answer: "SHOPPING CART", difficulty: "easy" },
+    { clue: "THING", answer: "MOVIE TICKET", difficulty: "easy" },
+    { clue: "THING", answer: "FRONT DOOR", difficulty: "easy" },
+    { clue: "THING", answer: "DINNER TABLE", difficulty: "easy" },
+    { clue: "THING", answer: "BASEBALL GLOVE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE CHIP COOKIES", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "MACARONI AND CHEESE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "PEANUT BUTTER AND JELLY", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "COOKIES AND CREAM", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN NUGGETS", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "FRENCH FRIES", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "ICE CREAM SUNDAE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "CHEESE PIZZA", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "HOT CHOCOLATE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "APPLE PIE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "PANCAKES AND SYRUP", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "GRILLED CHEESE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN SANDWICH", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE MILKSHAKE", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "SCRAMBLED EGGS", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "GARLIC BREAD", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "TACO SALAD", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "BAKED POTATO", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "FRUIT SALAD", difficulty: "easy" },
+    { clue: "FOOD & DRINK", answer: "LEMONADE", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WATCHING A MOVIE", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "ORDERING TAKEOUT", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "SLEEPING IN LATE", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "PLAYING VIDEO GAMES", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "LISTENING TO MUSIC", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "DOING MY HOMEWORK", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "MAKING BREAKFAST", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TAKING A NAP", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WALKING THE DOG", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TEXTING A FRIEND", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WATCHING TELEVISION", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "RIDING MY BIKE", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "EATING DINNER", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "PLAYING BASKETBALL", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "CHECKING MY PHONE", difficulty: "easy" },
+    { clue: "WHAT ARE YOU DOING?", answer: "MAKING A SNACK", difficulty: "easy" },
+    { clue: "EVENT", answer: "BIRTHDAY PARTY", difficulty: "easy" },
+    { clue: "EVENT", answer: "FOOTBALL GAME", difficulty: "easy" },
+    { clue: "EVENT", answer: "SCHOOL DANCE", difficulty: "easy" },
+    { clue: "EVENT", answer: "FAMILY DINNER", difficulty: "easy" },
+    { clue: "EVENT", answer: "MOVIE NIGHT", difficulty: "easy" },
+    { clue: "EVENT", answer: "BASKETBALL GAME", difficulty: "easy" },
+    { clue: "EVENT", answer: "ROAD TRIP", difficulty: "easy" },
+    { clue: "EVENT", answer: "GAME NIGHT", difficulty: "easy" },
+    { clue: "EVENT", answer: "SUMMER VACATION", difficulty: "easy" },
+    { clue: "PERSON", answer: "BEST FRIEND", difficulty: "easy" },
+    { clue: "PERSON", answer: "BUS DRIVER", difficulty: "easy" },
+    { clue: "PERSON", answer: "MATH TEACHER", difficulty: "easy" },
+    { clue: "PERSON", answer: "TEAM CAPTAIN", difficulty: "easy" },
+    { clue: "PERSON", answer: "SOCCER COACH", difficulty: "easy" },
+    { clue: "PERSON", answer: "OLDER BROTHER", difficulty: "easy" },
+    { clue: "PERSON", answer: "YOUNGER SISTER", difficulty: "easy" }
+  ];
+  const mediumPuzzles = [
+    { clue: "EVENT", answer: "GRADUATION CEREMONY", difficulty: "medium" },
+    { clue: "PERSON", answer: "NEXT DOOR NEIGHBOR", difficulty: "medium" },
+    { clue: "PERSON", answer: "FAVORITE TEACHER", difficulty: "medium" },
+    { clue: "PERSON", answer: "CLASS PRESIDENT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "BETTER LATE THAN NEVER", difficulty: "medium" },
+    { clue: "PHRASE", answer: "READ BETWEEN THE LINES", difficulty: "medium" },
+    { clue: "PHRASE", answer: "EASIER SAID THAN DONE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "IT'S NOT ROCKET SCIENCE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THAT'S WHAT I'M TALKING ABOUT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "KEEP YOUR EYES ON THE ROAD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "YOU'VE GOT TO BE KIDDING ME", difficulty: "medium" },
+    { clue: "PHRASE", answer: "YOU ONLY LIVE ONCE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "A PICTURE IS WORTH A THOUSAND WORDS", difficulty: "medium" },
+    { clue: "PHRASE", answer: "DON'T PUT ALL YOUR EGGS IN ONE BASKET", difficulty: "medium" },
+    { clue: "PHRASE", answer: "WHEN IT RAINS IT POURS", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THE EARLY BIRD GETS THE WORM", difficulty: "medium" },
+    { clue: "PHRASE", answer: "PRACTICE MAKES PERFECT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THERE'S NO TIME LIKE THE PRESENT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "DON'T JUDGE A BOOK BY ITS COVER", difficulty: "medium" },
+    { clue: "PHRASE", answer: "LET'S GET THIS SHOW ON THE ROAD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THE CALM BEFORE THE STORM", difficulty: "medium" },
+    { clue: "PHRASE", answer: "A BREATH OF FRESH AIR", difficulty: "medium" },
+    { clue: "PHRASE", answer: "A CHANGE OF PACE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "BACK TO THE DRAWING BOARD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "BITE OFF MORE THAN YOU CAN CHEW", difficulty: "medium" },
+    { clue: "PHRASE", answer: "BREAK THE ICE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "CALL IT A DAY", difficulty: "medium" },
+    { clue: "PHRASE", answer: "GET THE BALL ROLLING", difficulty: "medium" },
+    { clue: "PHRASE", answer: "GO WITH THE FLOW", difficulty: "medium" },
+    { clue: "PHRASE", answer: "HIT THE NAIL ON THE HEAD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "KEEP YOUR FINGERS CROSSED", difficulty: "medium" },
+    { clue: "PHRASE", answer: "LEAVE NO STONE UNTURNED", difficulty: "medium" },
+    { clue: "PHRASE", answer: "MAKE A LONG STORY SHORT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "ON TOP OF THE WORLD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "OUT OF THE BLUE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "PULL YOURSELF TOGETHER", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THE LAST STRAW", difficulty: "medium" },
+    { clue: "PHRASE", answer: "TIME FLIES WHEN YOU'RE HAVING FUN", difficulty: "medium" },
+    { clue: "PHRASE", answer: "UNDER THE WEATHER", difficulty: "medium" },
+    { clue: "PHRASE", answer: "UP IN THE AIR", difficulty: "medium" },
+    { clue: "PHRASE", answer: "YOUR GUESS IS AS GOOD AS MINE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "A FRIEND IN NEED IS A FRIEND INDEED", difficulty: "medium" },
+    { clue: "PHRASE", answer: "ALL GOOD THINGS MUST COME TO AN END", difficulty: "medium" },
+    { clue: "PHRASE", answer: "DON'T COUNT YOUR CHICKENS BEFORE THEY HATCH", difficulty: "medium" },
+    { clue: "PHRASE", answer: "EVERY CLOUD HAS A SILVER LINING", difficulty: "medium" },
+    { clue: "PHRASE", answer: "GO BIG OR GO HOME", difficulty: "medium" },
+    { clue: "PHRASE", answer: "GOOD THINGS COME TO THOSE WHO WAIT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "IF IT AIN'T BROKE DON'T FIX IT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "KEEP YOUR CHIN UP", difficulty: "medium" },
+    { clue: "PHRASE", answer: "LOOK BEFORE YOU LEAP", difficulty: "medium" },
+    { clue: "PHRASE", answer: "NO PAIN NO GAIN", difficulty: "medium" },
+    { clue: "PHRASE", answer: "NOT MY CUP OF TEA", difficulty: "medium" },
+    { clue: "PHRASE", answer: "ONCE IN A BLUE MOON", difficulty: "medium" },
+    { clue: "PHRASE", answer: "PUT YOUR BEST FOOT FORWARD", difficulty: "medium" },
+    { clue: "PHRASE", answer: "SPEAK OF THE DEVIL", difficulty: "medium" },
+    { clue: "PHRASE", answer: "TAKE IT WITH A GRAIN OF SALT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THE BALL IS IN YOUR COURT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THE TIP OF THE ICEBERG", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THERE'S LIGHT AT THE END OF THE TUNNEL", difficulty: "medium" },
+    { clue: "PHRASE", answer: "THROW CAUTION TO THE WIND", difficulty: "medium" },
+    { clue: "PHRASE", answer: "TWO HEADS ARE BETTER THAN ONE", difficulty: "medium" },
+    { clue: "PHRASE", answer: "WE'LL CROSS THAT BRIDGE WHEN WE COME TO IT", difficulty: "medium" },
+    { clue: "PHRASE", answer: "YOU CAN SAY THAT AGAIN", difficulty: "medium" },
+    { clue: "PHRASE", answer: "YOU TOOK THE WORDS RIGHT OUT OF MY MOUTH", difficulty: "medium" },
+    { clue: "THING", answer: "NOISE-CANCELING HEADPHONES", difficulty: "medium" },
+    { clue: "THING", answer: "RECHARGEABLE BATTERY", difficulty: "medium" },
+    { clue: "THING", answer: "PASSENGER SEAT", difficulty: "medium" },
+    { clue: "THING", answer: "REARVIEW MIRROR", difficulty: "medium" },
+    { clue: "THING", answer: "PASSWORD RESET", difficulty: "medium" },
+    { clue: "THING", answer: "PORTABLE PHONE CHARGER", difficulty: "medium" },
+    { clue: "THING", answer: "BLUETOOTH SPEAKER", difficulty: "medium" },
+    { clue: "THING", answer: "DIGITAL ALARM CLOCK", difficulty: "medium" },
+    { clue: "THING", answer: "ELECTRIC TOOTHBRUSH", difficulty: "medium" },
+    { clue: "THING", answer: "GAMING KEYBOARD", difficulty: "medium" },
+    { clue: "THING", answer: "COMPUTER MONITOR", difficulty: "medium" },
+    { clue: "THING", answer: "WIRELESS MOUSE", difficulty: "medium" },
+    { clue: "THING", answer: "HOODED SWEATSHIRT", difficulty: "medium" },
+    { clue: "THING", answer: "RUNNING SHOES", difficulty: "medium" },
+    { clue: "THING", answer: "BASEBALL BAT", difficulty: "medium" },
+    { clue: "THING", answer: "BASKETBALL JERSEY", difficulty: "medium" },
+    { clue: "THING", answer: "FOOTBALL HELMET", difficulty: "medium" },
+    { clue: "THING", answer: "SCHOOL LOCKER", difficulty: "medium" },
+    { clue: "THING", answer: "NOTEBOOK PAPER", difficulty: "medium" },
+    { clue: "THING", answer: "MECHANICAL PENCIL", difficulty: "medium" },
+    { clue: "THING", answer: "GRAPHING CALCULATOR", difficulty: "medium" },
+    { clue: "THING", answer: "STAINLESS STEEL WATER BOTTLE", difficulty: "medium" },
+    { clue: "THING", answer: "CAR AIR FRESHENER", difficulty: "medium" },
+    { clue: "THING", answer: "WINDSHIELD WIPERS", difficulty: "medium" },
+    { clue: "THING", answer: "SEAT BELT", difficulty: "medium" },
+    { clue: "THING", answer: "TRAFFIC LIGHT", difficulty: "medium" },
+    { clue: "THING", answer: "LICENSE PLATE", difficulty: "medium" },
+    { clue: "THING", answer: "GAS PEDAL", difficulty: "medium" },
+    { clue: "THING", answer: "STEERING WHEEL", difficulty: "medium" },
+    { clue: "THING", answer: "SIDE-VIEW MIRROR", difficulty: "medium" },
+    { clue: "THING", answer: "PARKING METER", difficulty: "medium" },
+    { clue: "THING", answer: "GIFT CARD", difficulty: "medium" },
+    { clue: "THING", answer: "MOVIE POSTER", difficulty: "medium" },
+    { clue: "THING", answer: "BOARD GAME", difficulty: "medium" },
+    { clue: "THING", answer: "DECK OF CARDS", difficulty: "medium" },
+    { clue: "THING", answer: "PAIR OF SNEAKERS", difficulty: "medium" },
+    { clue: "THING", answer: "WINTER JACKET", difficulty: "medium" },
+    { clue: "THING", answer: "BASEBALL SCOREBOARD", difficulty: "medium" },
+    { clue: "THING", answer: "BASKETBALL SCOREBOARD", difficulty: "medium" },
+    { clue: "THING", answer: "TENNIS RACKET", difficulty: "medium" },
+    { clue: "THING", answer: "PICNIC TABLE", difficulty: "medium" },
+    { clue: "THING", answer: "LAWN CHAIR", difficulty: "medium" },
+    { clue: "THING", answer: "BEACH TOWEL", difficulty: "medium" },
+    { clue: "THING", answer: "UMBRELLA", difficulty: "medium" },
+    { clue: "THING", answer: "FLASHLIGHT", difficulty: "medium" },
+    { clue: "THING", answer: "VACUUM CLEANER", difficulty: "medium" },
+    { clue: "THING", answer: "CEILING FAN", difficulty: "medium" },
+    { clue: "THING", answer: "MICROWAVE OVEN", difficulty: "medium" },
+    { clue: "THING", answer: "WASHING MACHINE", difficulty: "medium" },
+    { clue: "THING", answer: "DISHWASHER", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN AND WAFFLES", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BUFFALO CHICKEN WINGS", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "LOADED BAKED POTATO", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "SPAGHETTI AND MEATBALLS", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN PARMESAN", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "MOZZARELLA STICKS", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE BROWNIE", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "STRAWBERRY MILKSHAKE", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "VANILLA ICE CREAM", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BLUEBERRY PANCAKES", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CINNAMON FRENCH TOAST", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BACON CHEESEBURGER", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHICKEN CAESAR SALAD", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BARBECUE CHICKEN", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "MASHED POTATOES AND GRAVY", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE COVERED PRETZELS", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "PEPPERONI PIZZA", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CRISPY CHICKEN SANDWICH", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "MACARONI SALAD", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE CAKE", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "FRESHLY BAKED COOKIES", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "GRILLED CHICKEN", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "HOMEMADE APPLE PIE", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "SALTED CARAMEL", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BUTTERED POPCORN", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "BREAKFAST BURRITO", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CHOCOLATE COVERED STRAWBERRIES", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "CREAMY TOMATO SOUP", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "HAM AND CHEESE SANDWICH", difficulty: "medium" },
+    { clue: "FOOD & DRINK", answer: "LEMON MERINGUE PIE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "SCROLLING THROUGH MY PHONE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "STUDYING FOR A TEST", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "DRIVING TO SCHOOL", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "HANGING OUT WITH FRIENDS", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "PLAYING A BOARD GAME", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "MAKING A PLAYLIST", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "CLEANING MY ROOM", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "PACKING FOR VACATION", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WAITING FOR THE WEEKEND", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "LOOKING FOR MY KEYS", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "CHARGING MY PHONE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "GETTING READY FOR SCHOOL", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WATCHING THE BIG GAME", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "MAKING DINNER", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WASHING THE CAR", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TAKING OUT THE TRASH", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "DOING THE DISHES", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "PLAYING CATCH", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "SHOOTING HOOPS", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "RIDING IN THE PASSENGER SEAT", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WAITING IN LINE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TRYING SOMETHING NEW", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "GETTING SOME FRESH AIR", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TAKING A ROAD TRIP", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "BROWSING THE INTERNET", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "SENDING A TEXT MESSAGE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "TURNING UP THE VOLUME", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "LOOKING OUT THE WINDOW", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "MAKING WEEKEND PLANS", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "CATCHING UP ON SLEEP", difficulty: "medium" },
+    { clue: "EVENT", answer: "CHAMPIONSHIP GAME", difficulty: "medium" },
+    { clue: "EVENT", answer: "SURPRISE PARTY", difficulty: "medium" },
+    { clue: "EVENT", answer: "FAMILY REUNION", difficulty: "medium" },
+    { clue: "EVENT", answer: "SCHOOL ASSEMBLY", difficulty: "medium" },
+    { clue: "EVENT", answer: "AWARDS CEREMONY", difficulty: "medium" },
+    { clue: "EVENT", answer: "CONCERT", difficulty: "medium" },
+    { clue: "EVENT", answer: "WEDDING RECEPTION", difficulty: "medium" },
+    { clue: "EVENT", answer: "DINNER PARTY", difficulty: "medium" },
+    { clue: "EVENT", answer: "WEEKEND GETAWAY", difficulty: "medium" },
+    { clue: "EVENT", answer: "HOLIDAY PARADE", difficulty: "medium" },
+    { clue: "EVENT", answer: "TALENT SHOW", difficulty: "medium" },
+    { clue: "EVENT", answer: "FIELD TRIP", difficulty: "medium" },
+    { clue: "EVENT", answer: "BASKETBALL TOURNAMENT", difficulty: "medium" },
+    { clue: "EVENT", answer: "FOOTBALL PRACTICE", difficulty: "medium" },
+    { clue: "EVENT", answer: "BASEBALL PRACTICE", difficulty: "medium" },
+    { clue: "PERSON", answer: "HIGH SCHOOL PRINCIPAL", difficulty: "medium" },
+    { clue: "PERSON", answer: "BASKETBALL COACH", difficulty: "medium" },
+    { clue: "PERSON", answer: "FOOTBALL QUARTERBACK", difficulty: "medium" },
+    { clue: "PERSON", answer: "MOVIE DIRECTOR", difficulty: "medium" },
+    { clue: "PERSON", answer: "GAME SHOW HOST", difficulty: "medium" },
+    { clue: "PERSON", answer: "RESTAURANT MANAGER", difficulty: "medium" },
+    { clue: "PERSON", answer: "DELIVERY DRIVER", difficulty: "medium" },
+    { clue: "PERSON", answer: "SCHOOL COUNSELOR", difficulty: "medium" },
+    { clue: "PERSON", answer: "TEAMMATE", difficulty: "medium" },
+    { clue: "PERSON", answer: "FAMILY FRIEND", difficulty: "medium" },
+    { clue: "PERSON", answer: "OLDER COUSIN", difficulty: "medium" }
+  ];
+  const allPuzzles = [...easyPuzzles, ...mediumPuzzles];
+
+  const $ = (s) => document.querySelector(s);
+  let player = "";
+  let startedAt = "";
+  let bank = 0;
+  let solved = 0;
+  let attempted = 0;
+  let realRound = 0;
+let cashOutReturnMode = null;
+  let testPool = [];
+  let realEasyPool = [];
+  let realMediumPool = [];
+  const seenAnswers = new Set();
+
+  function shuffled(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function takeUnseen(poolName) {
+    let pool = poolName === "test" ? testPool : (poolName === "easy" ? realEasyPool : realMediumPool);
+    const source = poolName === "test" ? allPuzzles : (poolName === "easy" ? easyPuzzles : mediumPuzzles);
+    if (!pool.length) {
+      pool = shuffled(source.filter(p => !seenAnswers.has(p.answer)));
+      if (!pool.length) pool = shuffled(source);
+      if (poolName === "test") testPool = pool;
+      else if (poolName === "easy") realEasyPool = pool;
+      else realMediumPool = pool;
+    }
+    const puzzle = pool.pop();
+    seenAnswers.add(puzzle.answer);
+    return puzzle;
+  }
+  let current = null;
+  let isPractice = true;
+  let guessed = new Set();
+  let value = 0;
+  let timer = null;
+  let mode = "welcome";
+  let clockTimer = null;
+  let puzzleStartedMs = 0;
+  let lastActionMs = 0;
+
+  function normalizeAnswer(s) {
+    return s.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  }
+
+  function stopTimer() {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    if (clockTimer) {
+      clearInterval(clockTimer);
+      clockTimer = null;
+    }
+  }
+
+  function updateHeader() {
+    $("#bank").textContent = "$" + bank.toFixed(2);
+    if ($("#solved")) $("#solved").textContent = String(solved);
+  }
+
+  function renderBoard(showAll) {
+    const board = $("#board");
+    board.innerHTML = "";
+    current.answer.split(" ").forEach((wordText) => {
+      const word = document.createElement("span");
+      word.className = "word";
+      for (const ch of wordText) {
+        const tile = document.createElement("span");
+        tile.className = "tile";
+        if (/[A-Z]/.test(ch)) {
+          tile.textContent = (showAll || guessed.has(ch)) ? ch : "";
+        } else {
+          tile.textContent = ch;
+        }
+        word.appendChild(tile);
+      }
+      board.appendChild(word);
+    });
+  }
+
+  function renderAlphabet() {
+    const el = $("#alphabet");
+    el.innerHTML = "";
+
+    const remaining = Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+      .filter(letter => !guessed.has(letter));
+    const splitAt = Math.ceil(remaining.length / 2);
+    const rows = [remaining.slice(0, splitAt), remaining.slice(splitAt)];
+
+    rows.forEach(letters => {
+      if (!letters.length) return;
+      const row = document.createElement("div");
+      row.className = "alphabet-row";
+
+      letters.forEach(letter => {
+        const key = document.createElement("span");
+        key.className = "key";
+        key.textContent = letter;
+        key.addEventListener("click", () => {
+          if (mode === "playing") guessLetter(letter);
+        });
+        row.appendChild(key);
+      });
+
+      el.appendChild(row);
+    });
+  }
+
+  function loadPuzzle(practiceMode) {
+    stopTimer();
+    isPractice = practiceMode;
+    if (practiceMode) {
+      current = takeUnseen("test");
+    } else {
+      realRound += 1;
+      current = realRound === 1 ? takeUnseen("easy") : takeUnseen("medium");
+    }
+    value = 5;
+    guessed = new Set();
+    mode = "waiting";
+    $("#roundLabel").textContent = practiceMode ? "TEST MODE — WINNINGS DO NOT COUNT" : "BIRTHDAY MONEY ROUND";
+    $("#clue").textContent = current.clue;
+    $("#money").textContent = "$5.00";
+    $("#money").classList.remove("drop");
+    $("#guessed").textContent = "—";
+    $("#status").textContent = "Waiting to start";
+    $("#startSub").textContent = practiceMode
+      ? "Practice rules are exactly the same. Press SPACE to start."
+      : "Press SPACE to start. Type or click letters. You have 20 seconds between guesses and 4 minutes total.";
+    $("#startPrompt").classList.remove("hidden");
+    $("#timers").classList.add("hidden");
+    $("#solvePanel").classList.add("hidden");
+    $("#result").classList.add("hidden");
+    $("#game").classList.remove("hidden");
+    renderBoard(false);
+    renderAlphabet();
+  }
+
+  function formatPuzzleTime(secondsLeft) {
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    return m + ":" + String(s).padStart(2, "0");
+  }
+
+  function flashValue() {
+    const money = $("#money");
+    money.classList.remove("drop");
+    void money.offsetWidth;
+    money.classList.add("drop");
+    setTimeout(() => money.classList.remove("drop"), 650);
+  }
+
+  function timeUp(reason) {
+    if (mode !== "playing") return;
+    stopTimer();
+    soundTimeout();
+    mode = "result";
+    value = 0;
+    $("#money").textContent = "$0.00";
+    $("#timers").classList.add("hidden");
+    renderBoard(true);
+    showResult(
+      "<div style=\"font-size:40px\">⏰</div><h2>TIME'S UP!</h2>" +
+      "<p>" + reason + "</p>" +
+      "<p>The answer was <b>" + current.answer + "</b>.</p>" +
+      (isPractice
+        ? "<p>Practice value: <b>$0</b> — this does not count.</p>"
+        : "<p><b>$0</b> added to your Birthday Bank.</p>") +
+      (isPractice
+        ? '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> <button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+        : nextButton("NEXT PUZZLE"))
+    );
+    $("#nextButton").addEventListener("click", () => {
+      if (isPractice) loadPuzzle(true);
+      else loadPuzzle(false);
+    });
+    if (isPractice) wireRealButton();
+  }
+
+  function updateTimers() {
+    if (mode !== "playing") return;
+    const now = Date.now();
+    const guessElapsed = Math.floor((now - lastActionMs) / 1000);
+    const puzzleElapsed = Math.floor((now - puzzleStartedMs) / 1000);
+    const guessLeft = Math.max(0, 20 - guessElapsed);
+    const puzzleLeft = Math.max(0, 240 - puzzleElapsed);
+    $("#guessTimer").textContent = String(guessLeft);
+    $("#puzzleTimer").textContent = formatPuzzleTime(puzzleLeft);
+    if (guessLeft <= 5 && guessLeft > 0 && guessLeft !== lastCountdownBeep) {
+      lastCountdownBeep = guessLeft;
+      soundTick();
+    } else if (guessLeft > 5) {
+      lastCountdownBeep = null;
+    }
+    if (puzzleElapsed >= 240) {
+      timeUp("The 4-minute puzzle limit expired.");
+    } else if (guessElapsed >= 20) {
+      timeUp("20 seconds passed without a guess or solve attempt.");
+    }
+  }
+
+  function startPuzzle() {
+    if (mode !== "waiting") return;
+    mode = "playing";
+    if (!isPractice) attempted += 1;
+    $("#startPrompt").classList.add("hidden");
+    $("#status").textContent = "TYPE OR CLICK A LETTER • HIT SPACE TO SOLVE";
+    puzzleStartedMs = Date.now();
+    lastActionMs = puzzleStartedMs;
+    $("#timers").classList.remove("hidden");
+    $("#guessTimer").textContent = "20";
+    $("#puzzleTimer").textContent = "4:00";
+    clockTimer = setInterval(updateTimers, 250);
+  }
+
+  function guessLetter(letter) {
+    if (mode !== "playing" || guessed.has(letter)) return;
+    guessed.add(letter);
+    const letterCost = "AEIOU".includes(letter) ? 0.30 : 0.10;
+    value = Math.max(0, Math.round((value - letterCost) * 100) / 100);
+    $("#money").textContent = "$" + value.toFixed(2);
+    flashValue();
+    lastActionMs = Date.now();
+    $("#guessed").textContent = Array.from(guessed).join("  ");
+    renderAlphabet();
+    renderBoard(false);
+    const letterIsCorrect = current.answer.includes(letter);
+    $("#status").textContent = letterIsCorrect ? "✓ " + letter + " is in the puzzle" : "✕ No " + letter;
+    if (letterIsCorrect) soundCorrectLetter(); else soundWrongLetter();
+
+    const allLettersRevealed = Array.from(current.answer)
+      .filter(ch => /[A-Z]/.test(ch))
+      .every(ch => guessed.has(ch));
+
+    if (allLettersRevealed) {
+      stopTimer();
+      soundSolve();
+      mode = "result";
+      $("#timers").classList.add("hidden");
+      renderBoard(true);
+
+      if (isPractice) {
+        showResult(
+          '<div style="font-size:40px">✅</div><h2>TEST PUZZLE COMPLETE!</h2>' +
+          '<p>You revealed every letter.</p>' +
+          "<p>Practice value: <b>$" + value.toFixed(2) + "</b> — this does not count.</p>" +
+          '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> ' +
+          '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+        );
+      } else {
+        bank += value;
+        solved += 1;
+        updateHeader();
+        const done = bank >= 40;
+        showResult(
+          '<div style="font-size:40px">🎉</div><h2>PUZZLE COMPLETE!</h2>' +
+          '<p>You revealed every letter and automatically solved the puzzle.</p>' +
+          "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
+          "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
+          nextButton(done ? "CONTINUE" : "NEXT PUZZLE")
+        );
+      }
+
+      $("#nextButton").addEventListener("click", () => {
+        if (isPractice) loadPuzzle(true);
+        else if (bank >= 40) finishGame();
+        else loadPuzzle(false);
+      });
+      if (isPractice) wireRealButton();
+      return;
+    }
+
+    if (value <= 0) {
+      timeUp("The puzzle value reached $0.");
+    }
+  }
+
+  function enterSolveMode() {
+    if (mode !== "playing") return;
+    stopTimer();
+    mode = "solve";
+    $("#timers").classList.add("hidden");
+    $("#locked").textContent = "$" + value.toFixed(2);
+    $("#solvePanel").classList.remove("hidden");
+    $("#status").textContent = "Locked — type the full answer";
+    $("#solution").value = "";
+    $("#solution").focus();
+  }
+
+  function showResult(html) {
+    $("#result").innerHTML = html;
+    $("#result").classList.remove("hidden");
+  }
+
+  function nextButton(label) {
+    return '<button id="nextButton" class="btn" type="button">' + label + "</button>";
+  }
+
+  async function reportResult() {
+    const payload = {
+      player: player,
+      started: startedAt,
+      finished: new Date().toISOString(),
+      winnings: bank,
+      attempted: attempted,
+      solved: solved
+    };
+    try {
+      await fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("Result reporting failed:", err);
+    }
+  }
+
+  function finishGame() {
+    stopTimer();
+    if (bank >= 8.88) soundHappyBirthday();
+    else soundFinal();
+    mode = "finished";
+    $("#game").classList.add("hidden");
+    $("#header").classList.add("hidden");
+    const finish = document.createElement("section");
+    finish.className = "card center";
+    finish.innerHTML =
+      '<div style="font-size:58px">🎂🎉💵</div>' +
+      "<h1>HAPPY 17TH BIRTHDAY, SAM!</h1>" +
+      '<div class="muted">Your final Birthday Challenge winnings are</div>' +
+      '<div style="font-size:64px;font-weight:900;margin:10px">$' + bank.toFixed(2) + "</div>" +
+      "<p>Your official result has been sent to Aunt Georgia and Uncle Steve.</p>" +
+      "<p><b>They owe you $" + bank.toFixed(2) + ".</b> 😎</p>";
+    document.querySelector(".wrap").appendChild(finish);
+    reportResult();
+  }
+
+  function showCashOutConfirmation() {
+    if (isPractice || realRound < 1 || mode === "finished") return;
+    stopTimer();
+    cashOutReturnMode = mode;
+    $("#cashOutAmount").textContent = "$" + bank.toFixed(2);
+    $("#game").classList.add("hidden");
+    $("#header").classList.add("hidden");
+    $("#cashOutConfirm").classList.remove("hidden");
+  }
+
+  function resumeAfterCashOutCancel() {
+    $("#cashOutConfirm").classList.add("hidden");
+    $("#game").classList.remove("hidden");
+    $("#header").classList.remove("hidden");
+
+    // If cash-out was invoked during active play, restart the between-action
+    // clock at 20 seconds while preserving the original 4-minute puzzle limit.
+    if (cashOutReturnMode === "playing") {
+      lastActionMs = Date.now();
+      $("#timers").classList.remove("hidden");
+      clockTimer = setInterval(updateTimers, 250);
+    }
+  }
+
+  function showRealConfirmation() {
+    stopTimer();
+    $("#game").classList.add("hidden");
+    $("#header").classList.add("hidden");
+    $("#realConfirm").classList.remove("hidden");
+  }
+
+  function wireRealButton() {
+    if ($("#realButton")) {
+      $("#realButton").addEventListener("click", showRealConfirmation);
+    }
+  }
+
+  $("#soundToggle").addEventListener("click", () => {
+    soundOn = !soundOn;
+    $("#soundToggle").textContent = soundOn ? "🔊 SOUND ON" : "🔇 SOUND OFF";
+    if (soundOn) {
+      tone(660, .07, .035);
+      if (entertainerPlaying && !entertainerTimer) playEntertainerPhrase();
+    }
+  });
+
+  function beginFromSplash() {
+    if ($("#startScreen").classList.contains("hidden")) return;
+    $("#startScreen").classList.add("hidden");
+    $("#welcome").classList.remove("hidden");
+    startEntertainer();
+    $("#playerName").focus();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !$("#startScreen").classList.contains("hidden")) {
+      e.preventDefault();
+      beginFromSplash();
+    }
+  });
+
+  $("#nameForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = $("#playerName").value.trim();
+    if (!name) {
+      $("#nameError").textContent = "Please enter your first name.";
+      $("#playerName").focus();
+      return;
+    }
+    player = name;
+    startedAt = new Date().toISOString();
+    $("#welcome").classList.add("hidden");
+    $("#intro").classList.remove("hidden");
+  });
+
+  $("#beginPractice").addEventListener("click", () => {
+    stopEntertainer();
+    $("#intro").classList.add("hidden");
+    $("#header").classList.remove("hidden");
+    loadPuzzle(true);
+  });
+
+  $("#solveForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (mode !== "solve") return;
+    const correct = normalizeAnswer($("#solution").value) === normalizeAnswer(current.answer);
+    if (correct) soundSolve(); else soundWrongSolve();
+    mode = "result";
+    $("#solvePanel").classList.add("hidden");
+    renderBoard(true);
+
+    if (isPractice) {
+      const msg = correct
+        ? '<div style="font-size:40px">✅</div><h2>CORRECT!</h2><p>Practice value: <b>$' + value.toFixed(2) + '</b> — this does not count.</p>'
+        : '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2><p>The answer was <b>' + current.answer + "</b>.</p><p>Practice value: $0 — this does not count.</p>";
+      showResult(
+        msg +
+        '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> ' +
+        '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+      );
+    } else if (correct) {
+      bank += value;
+      solved += 1;
+      updateHeader();
+      const done = bank >= 40;
+      showResult(
+        '<div style="font-size:40px">🎉</div><h2>CORRECT!</h2>' +
+        "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
+        "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
+        nextButton(done ? "CONTINUE" : "NEXT PUZZLE")
+      );
+    } else {
+      showResult(
+        '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2>' +
+        "<p>The answer was <b>" + current.answer + "</b>.</p>" +
+        "<p>$0 banked. Birthday Bank stays at <b>$" + bank + "</b>.</p>" +
+        nextButton("NEXT PUZZLE")
+      );
+    }
+
+    $("#nextButton").addEventListener("click", () => {
+      if (isPractice) {
+        loadPuzzle(true);
+      } else if (bank >= 40) {
+        finishGame();
+      } else {
+        loadPuzzle(false);
+      }
+    });
+    if (isPractice) wireRealButton();
+  });
+
+  $("#keepPlaying").addEventListener("click", resumeAfterCashOutCancel);
+
+  $("#confirmCashOut").addEventListener("click", () => {
+    $("#cashOutConfirm").classList.add("hidden");
+    finishGame();
+  });
+
+  $("#backToTest").addEventListener("click", () => {
+    $("#passwordPanel").classList.add("hidden");
+    $("#passwordError").textContent = "";
+    $("#realConfirm").classList.add("hidden");
+    $("#header").classList.remove("hidden");
+    loadPuzzle(true);
+  });
+
+  function beginRealGame() {
+    $("#realConfirm").classList.add("hidden");
+    $("#passwordPanel").classList.add("hidden");
+    $("#header").classList.remove("hidden");
+    bank = 0;
+    attempted = 0;
+    solved = 0;
+    realRound = 0;
+    updateHeader();
+    loadPuzzle(false);
+  }
+
+  $("#confirmReal").addEventListener("click", () => {
+    const name = player.trim().toUpperCase();
+    if (name === "SAM" || name === "SAMUEL") {
+      $("#passwordPanel").classList.remove("hidden");
+      $("#passwordError").textContent = "";
+      $("#realPassword").value = "";
+      $("#realPassword").focus();
+    } else {
+      beginRealGame();
+    }
+  });
+
+  $("#passwordForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if ($("#realPassword").value === "09282009") {
+      $("#passwordError").textContent = "";
+      beginRealGame();
+    } else {
+      $("#passwordError").textContent = "Incorrect password.";
+      $("#realPassword").select();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === "C") {
+      e.preventDefault();
+      showCashOutConfirmation();
+      return;
+    }
+    if (e.target && e.target.tagName === "INPUT") return;
+    if (e.code === "Space") {
+      e.preventDefault();
+      if (mode === "waiting") startPuzzle();
+      else if (mode === "playing") enterSolveMode();
+      return;
+    }
+    if (mode === "playing" && /^[a-zA-Z]$/.test(e.key)) {
+      e.preventDefault();
+      guessLetter(e.key.toUpperCase());
+    }
+  });
+
+  updateHeader();
+})();
+</script>
+</body>
+</html>
