@@ -732,7 +732,7 @@ let cashOutReturnMode = null;
       if (v === 2) return "🎂";
       return Math.round(v*100) + "¢";
     };
-    const finalLabel=v => v === "BANKRUPT" ? "😈 BANKRUPT" : (v === 1 ? "$1.00" : (v === 2 ? "$2.00" : Math.round(v*100) + "¢"));
+    const finalLabel=v => v === "BANKRUPT" ? "😈 BANKRUPT" : (v === 1 ? "💰 $1.00" : (v === 2 ? "🎂 $2.00" : Math.round(v*100) + "¢"));
 
     const finishSpin = () => {
       if (!spinAnimating || mode !== "playing") return;
