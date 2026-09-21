@@ -810,7 +810,7 @@ let cashOutReturnMode = null;
 
   function finishGame() {
     stopTimer();
-    if (bank >= 8.88) soundHappyBirthday();
+    if (bank >= 1.88) soundHappyBirthday();
     else soundFinal();
     mode = "finished";
     $("#game").classList.add("hidden");
@@ -819,7 +819,7 @@ let cashOutReturnMode = null;
     finish.className = "card center";
     finish.innerHTML =
       '<div style="font-size:58px">🎂🎉💵</div>' +
-      "<h1>HAPPY 17TH BIRTHDAY, SAM!</h1>" +
+      "<h1>HAPPY 17th BIRTHDAY, SAM!</h1>" +
       '<div class="muted">Your final Birthday Challenge winnings are</div>' +
       '<div style="font-size:64px;font-weight:900;margin:10px">$' + bank.toFixed(2) + "</div>" +
       "<p>Your official result has been sent to Aunt Georgia and Uncle Steve.</p>" +
