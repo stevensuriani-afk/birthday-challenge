@@ -55,6 +55,14 @@ body::before{
   pointer-events:none;
   z-index:900;
 }
+
+.key.disabled-letter{
+  opacity:.28;
+  cursor:not-allowed;
+  filter:grayscale(1);
+}
+#wheelControls.hidden{display:none !important}
+#wheelControls .btn:disabled{opacity:.42;cursor:not-allowed;transform:none}
 </style>
 </head>
 <body>
@@ -94,12 +102,13 @@ body::before{
     <h2 style="margin-bottom:8px">HOW TO PLAY</h2>
   </div>
   <div style="max-width:690px;margin:0 auto;font-size:18px;line-height:1.6">
-    <p>Each puzzle starts at <b>$5.00</b>.</p>
-    <p><b>Type a letter</b> on your keyboard or <b>click a letter</b> on the screen.</p>
-    <p>Each <b>consonant</b> you guess reduces the puzzle value by <b>10¢</b>. Each <b>vowel</b> reduces it by <b>30¢</b>.</p>
-    <p>You have <b>20 seconds between guesses</b> and <b>4 minutes total</b> for each puzzle.</p>
-    <p>You must wait at least <b>3 seconds between letter guesses</b>.</p>
-    <p>Think you know it? <b>Press SPACE to solve.</b> Once you do, you have <b>60 seconds</b> to enter the full solution.</p>
+    <p>Each puzzle starts at <b>$0.00</b>. Build your winnings as you reveal letters.</p>
+    <p>For a <b>consonant</b>, click <b>SPIN</b>. The values keep spinning until you press <b>SPACE</b> to stop them, or they stop automatically after <b>30 seconds</b>. The spin can land on <b>25¢, 30¢, 50¢, 75¢, $1.00, $2.00, or 😈 BANKRUPT</b>. Then type or click one consonant. If it appears, you win the spun amount <b>for each occurrence</b>. A missed consonant costs nothing.</p>
+    <p>To guess a <b>vowel</b>, click <b>BUY A VOWEL — 25¢</b>. You must have at least 25¢ in the current puzzle. The 25¢ is charged when you buy the vowel, whether or not the vowel is in the puzzle.</p>
+    <p>After each consonant guess, spin again. After each vowel purchase, choose one vowel.</p>
+    <p>You have <b>30 seconds between actions</b>.</p>
+    <p>You must wait at least <b>3 seconds between letter guesses</b>. Guessing too quickly triggers three warning beeps.</p>
+    <p>Think you know it? Click <b>SOLVE</b>. Once you do, you have <b>60 seconds</b> to enter the full solution.</p>
     <p>If you reveal every letter, the puzzle is solved automatically.</p>
     <p><b>TEST MODE</b> works exactly like the real game, but the money doesn't count. Practice as long as you want. When you're ready, leave Test Mode and play for real birthday money.</p>
     <p>During the real game, press <b>Ctrl + Shift + C</b> if you want to cash out your Birthday Bank and end the game.</p>
@@ -124,6 +133,7 @@ body::before{
   <div style="max-width:650px;margin:0 auto;font-size:20px;line-height:1.55">
     <p>Once you choose to play for real, <b>you can't go back to Test Mode.</b></p>
     <p>The puzzles you play next will determine <b>how much birthday money you win.</b></p>
+    <p><b>Once you start, you can play until you cash out. Other people can even play in your place if you want. But once you click CASH OUT, that's it.</b></p>
     <p>Practice as much as you want before continuing.</p>
   </div>
   <div class="space" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -138,6 +148,7 @@ body::before{
       <div class="space"><button class="btn" type="submit">CONTINUE</button></div>
     </form>
     <div id="passwordError" class="error"></div>
+    <div id="realEntryStatus" class="muted" style="font-weight:800;margin-top:8px"></div>
   </div>
 </section>
 
@@ -147,9 +158,17 @@ body::before{
       <div style="text-align:right"><div class="label">PUZZLE VALUE</div><div id="money" class="money">$0</div></div>
     </div>
     <div id="board" class="board"></div>
-      <div style="text-align:center;margin-top:12px;font-size:18px;font-weight:900;color:#123d2c">HIT SPACE TO SOLVE</div>
     <div id="startPrompt" class="prompt"><div class="pulse">PRESS SPACE TO START</div><div id="startSub" class="muted"></div></div>
-    <div class="statusrow"><div><span class="muted">Guessed: </span><b id="guessed">—</b></div><b id="status"></b></div><div id="timers" class="timers hidden"><span>NEXT GUESS <b id="guessTimer">20</b>s</span><span>PUZZLE TIME <b id="puzzleTimer">4:00</b></span></div>
+    <div style="text-align:center;margin-top:12px"><span class="muted">Guessed: </span><b id="guessed">—</b></div>
+    <div id="wheelControls" class="hidden" style="margin:16px 0 4px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap">
+      <button id="spinButton" class="btn" type="button">🎡 SPIN</button>
+      <div id="spinResult" style="width:190px;min-width:190px;text-align:center;font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap">—</div>
+      <button id="buyVowelButton" class="btn" type="button">BUY A VOWEL — 25¢</button>
+      <button id="solveButton" class="btn" type="button">SOLVE</button>
+      <button id="cashOutButton" class="btn" type="button">CASH OUT</button>
+    </div>
+    <div id="status" class="center" style="font-weight:900;margin-top:10px;min-height:24px"></div>
+    <div id="timers" class="timers hidden"><span>NEXT ACTION <b id="guessTimer">30</b>s</span></div>
     <div id="alphabet" class="alphabet"></div>
 
     <div id="solvePanel" class="card solve center hidden">
@@ -184,6 +203,19 @@ body::before{
     tone(760,.08,.04,"square",0);
     tone(760,.08,.04,"square",.13);
     tone(760,.08,.04,"square",.26);
+  }
+
+  function soundDollarWin(){
+    tone(784,.09,.045,"triangle",0);
+    tone(988,.09,.045,"triangle",.09);
+    tone(1175,.10,.05,"triangle",.18);
+    tone(1568,.24,.055,"triangle",.28);
+  }
+
+  function soundBankrupt(){
+    // Descending two-note "whomp whomp".
+    tone(220,.34,.065,"sawtooth",0);
+    tone(147,.48,.075,"sawtooth",.36);
   }
   function soundFinal(){[523,659,784,1047].forEach((f,i)=>tone(f,i===3?.35:.14,.055,"sine",i*.12));}
   function soundGameShowFanfare(){
@@ -566,6 +598,12 @@ let cashOutReturnMode = null;
   let lastActionMs = 0;
   let lastLetterGuessMs = 0;
   let solveStartedMs = 0;
+  let letterMode = null;       // null, "consonant", or "vowel"
+  let spinValue = 0;
+  let spinAnimating = false;
+  let spinStopRequested = false;
+  let spinStartedMs = 0;
+  let currentSpinPreview = null;
 
   function normalizeAnswer(s) {
     return s.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -629,6 +667,11 @@ let cashOutReturnMode = null;
         const key = document.createElement("span");
         key.className = "key";
         key.textContent = letter;
+        const isVowel = "AEIOU".includes(letter);
+        const allowed = mode === "playing" &&
+          ((letterMode === "vowel" && isVowel) ||
+           (letterMode === "consonant" && !isVowel));
+        if (!allowed) key.classList.add("disabled-letter");
         key.addEventListener("click", () => {
           if (mode === "playing") guessLetter(letter);
         });
@@ -637,6 +680,139 @@ let cashOutReturnMode = null;
 
       el.appendChild(row);
     });
+  }
+
+  function updateWheelControls() {
+    const active = mode === "playing";
+    $("#spinButton").disabled = !active || letterMode !== null || spinAnimating;
+    $("#buyVowelButton").disabled = !active || letterMode !== null || spinAnimating || value < .25;
+    $("#solveButton").disabled = !active || spinAnimating;
+    $("#cashOutButton").disabled = !active || isPractice;
+
+    // This is the game's ONE changing instruction area.
+    if (!active) {
+      $("#status").textContent = "";
+    } else if (spinAnimating) {
+      $("#status").textContent = "HIT SPACE BAR TO STOP THE SPIN";
+    } else if (letterMode === "consonant") {
+      $("#status").textContent = "CHOOSE ONE CONSONANT FOR " +
+        (spinValue >= 1 ? "$" + spinValue.toFixed(2) : Math.round(spinValue * 100) + "¢") +
+        " PER OCCURRENCE";
+    } else if (letterMode === "vowel") {
+      $("#status").textContent = "CHOOSE ONE VOWEL — THE 25¢ PURCHASE HAS ALREADY BEEN DEDUCTED";
+    } else {
+      $("#status").textContent = value >= .25
+        ? "HIT SPIN OR BUY A VOWEL"
+        : "HIT SPIN";
+    }
+    renderAlphabet();
+  }
+
+  function spinWheel() {
+    if (mode !== "playing" || letterMode !== null || spinAnimating) return;
+
+    // Weighted wheel: 25¢ and 30¢ are 25% each, 50¢ is 20%, 75¢ is 12%,
+    // $1.00 is 8%, $2.00 is 5%, and BANKRUPT is 5%.
+    const weightedChoices=[
+      0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,
+      0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,0.25,
+      0.25,0.25,0.25,0.25,0.25,0.30,0.30,0.30,0.30,0.30,
+      0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,
+      0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,0.30,
+      0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,
+      0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,0.50,
+      0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,0.75,
+      0.75,0.75,1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00,
+      2.00,2.00,2.00,2.00,2.00,"BANKRUPT","BANKRUPT","BANKRUPT","BANKRUPT","BANKRUPT"
+    ];
+    const pickSpin=()=>weightedChoices[Math.floor(Math.random()*weightedChoices.length)];
+    const flashLabel=v => {
+      if (v === "BANKRUPT") return "😈";
+      if (v === 1) return "💰";
+      if (v === 2) return "🎂";
+      return Math.round(v*100) + "¢";
+    };
+    const finalLabel=v => v === "BANKRUPT" ? "😈 BANKRUPT" : (v === 1 ? "$1.00" : (v === 2 ? "$2.00" : Math.round(v*100) + "¢"));
+
+    const finishSpin = () => {
+      if (!spinAnimating || mode !== "playing") return;
+      spinAnimating=false;
+      spinStopRequested=false;
+      const result=currentSpinPreview;
+      lastActionMs=Date.now();
+      lastCountdownBeep=null;
+      $("#spinResult").textContent=finalLabel(result);
+
+      if (result === "BANKRUPT") {
+        value=0;
+        letterMode=null;
+        spinValue=0;
+        $("#money").textContent="$0.00";
+        flashValue();
+        $("#status").textContent="😈 BANKRUPT! PUZZLE CASH DROPS TO $0.00";
+        $("#status").textContent="Spin again to continue.";
+        soundBankrupt();
+        updateWheelControls();
+        return;
+      }
+
+      spinValue=result;
+      letterMode="consonant";
+      $("#status").textContent="SPIN RESULT: " + (spinValue >= 1 ? "$" + spinValue.toFixed(2) : Math.round(spinValue*100) + "¢") + " — CHOOSE A CONSONANT";
+      if (spinValue === 1 || spinValue === 2) {
+        soundDollarWin();
+      } else {
+        tone(660,.08,.04,"triangle",0);
+        tone(880,.12,.045,"triangle",.07);
+      }
+      updateWheelControls();
+    };
+
+    spinAnimating=true;
+    spinStopRequested=false;
+    spinStartedMs=Date.now();
+    currentSpinPreview=null;
+    lastActionMs=spinStartedMs;
+    lastCountdownBeep=null;
+    updateWheelControls();
+
+    let previousFlash=null;
+    let flashes=0;
+    const flashSpin=()=>{
+      if (mode !== "playing" || !spinAnimating) return;
+
+      let shown=pickSpin();
+      while (shown === previousFlash) shown=pickSpin();
+      previousFlash=shown;
+      currentSpinPreview=shown;
+      $("#spinResult").textContent=flashLabel(shown);
+      tone(430 + (flashes % 10)*28,.045,.022,"triangle");
+      flashes+=1;
+
+      if (spinStopRequested || Date.now() - spinStartedMs >= 30000) {
+        finishSpin();
+        return;
+      }
+      setTimeout(flashSpin,150);
+    };
+
+    flashSpin();
+  }
+
+  function buyVowel() {
+    if (mode !== "playing" || letterMode !== null) return;
+    if (value < .25) {
+      $("#status").textContent="YOU NEED AT LEAST 25¢ TO BUY A VOWEL";
+      return;
+    }
+    value=Math.round((value-.25)*100)/100;
+    $("#money").textContent="$"+value.toFixed(2);
+    flashValue();
+    letterMode="vowel";
+    lastActionMs=Date.now();
+    lastCountdownBeep=null;
+    $("#status").textContent="VOWEL PURCHASED FOR 25¢ — CHOOSE A VOWEL";
+    updateWheelControls();
   }
 
   function loadPuzzle(practiceMode) {
@@ -648,20 +824,26 @@ let cashOutReturnMode = null;
       realRound += 1;
       current = realRound === 1 ? takeUnseen("easy") : takeUnseen("medium");
     }
-    value = 5;
+    value = 0;
     guessed = new Set();
+    letterMode = null;
+    spinValue = 0;
+    spinAnimating = false;
     mode = "waiting";
     $("#roundLabel").textContent = practiceMode ? "TEST MODE — WINNINGS DO NOT COUNT" : "BIRTHDAY MONEY ROUND";
     $("#clue").textContent = current.clue;
-    $("#money").textContent = "$5.00";
+    $("#money").textContent = "$0.00";
     $("#money").classList.remove("drop");
     $("#guessed").textContent = "—";
     $("#status").textContent = "Waiting to start";
     $("#startSub").textContent = practiceMode
       ? "Practice rules are exactly the same. Press SPACE to start."
-      : "Press SPACE to start. Type or click letters. You have 20 seconds between guesses and 4 minutes total.";
+      : "Press SPACE to start. Spin for consonants, buy vowels, or click SOLVE when you know the answer.";
     $("#startPrompt").classList.remove("hidden");
     $("#timers").classList.add("hidden");
+    $("#wheelControls").classList.add("hidden");
+    $("#spinResult").textContent = "—";
+    $("#status").textContent = "";
     $("#solvePanel").classList.add("hidden");
     $("#result").classList.add("hidden");
     $("#game").classList.remove("hidden");
@@ -691,6 +873,8 @@ let cashOutReturnMode = null;
     value = 0;
     $("#money").textContent = "$0.00";
     $("#timers").classList.add("hidden");
+    $("#wheelControls").classList.add("hidden");
+    $("#status").textContent = "";
     renderBoard(true);
     showResult(
       "<div style=\"font-size:40px\">⏰</div><h2>TIME'S UP!</h2>" +
@@ -712,23 +896,22 @@ let cashOutReturnMode = null;
 
   function updateTimers() {
     if (mode !== "playing") return;
-    const now = Date.now();
-    const guessElapsed = Math.floor((now - lastActionMs) / 1000);
-    const puzzleElapsed = Math.floor((now - puzzleStartedMs) / 1000);
-    const guessLeft = Math.max(0, 20 - guessElapsed);
-    const puzzleLeft = Math.max(0, 240 - puzzleElapsed);
-    $("#guessTimer").textContent = String(guessLeft);
-    $("#puzzleTimer").textContent = formatPuzzleTime(puzzleLeft);
-    if (guessLeft <= 5 && guessLeft > 0 && guessLeft !== lastCountdownBeep) {
-      lastCountdownBeep = guessLeft;
-      soundTick();
-    } else if (guessLeft > 5) {
-      lastCountdownBeep = null;
+    if (spinAnimating) {
+      $("#guessTimer").textContent = Math.max(0, 30 - Math.floor((Date.now() - spinStartedMs) / 1000));
+      return;
     }
-    if (puzzleElapsed >= 240) {
-      timeUp("The 4-minute puzzle limit expired.");
-    } else if (guessElapsed >= 20) {
-      timeUp("20 seconds passed without a guess or solve attempt.");
+    const now = Date.now();
+    const sinceAction = Math.floor((now - lastActionMs) / 1000);
+    const actionLeft = Math.max(0, 30 - sinceAction);
+    $("#guessTimer").textContent = actionLeft;
+
+    if (actionLeft <= 5 && actionLeft > 0 && actionLeft !== lastCountdownBeep) {
+      lastCountdownBeep = actionLeft;
+      soundTick();
+    }
+
+    if (sinceAction >= 30) {
+      timeUp("30 seconds passed without an action or solve attempt.");
     }
   }
 
@@ -737,18 +920,36 @@ let cashOutReturnMode = null;
     mode = "playing";
     if (!isPractice) attempted += 1;
     $("#startPrompt").classList.add("hidden");
-    $("#status").textContent = "TYPE OR CLICK A LETTER • HIT SPACE TO SOLVE";
+    $("#status").textContent = "SPIN FOR A CONSONANT OR BUY A VOWEL";
     puzzleStartedMs = Date.now();
     lastActionMs = puzzleStartedMs;
     lastLetterGuessMs = 0;
     $("#timers").classList.remove("hidden");
-    $("#guessTimer").textContent = "20";
-    $("#puzzleTimer").textContent = "4:00";
+    $("#guessTimer").textContent = "30";
+    $("#wheelControls").classList.remove("hidden");
+    updateWheelControls();
     clockTimer = setInterval(updateTimers, 250);
   }
 
   function guessLetter(letter) {
     if (mode !== "playing" || guessed.has(letter)) return;
+
+    const isVowel="AEIOU".includes(letter);
+    if (letterMode === null) {
+      $("#status").textContent = isVowel
+        ? "CLICK BUY A VOWEL BEFORE GUESSING A VOWEL"
+        : "CLICK SPIN BEFORE GUESSING A CONSONANT";
+      return;
+    }
+    if (letterMode === "vowel" && !isVowel) {
+      $("#status").textContent = "YOU BOUGHT A VOWEL — CHOOSE A, E, I, O, OR U";
+      return;
+    }
+    if (letterMode === "consonant" && isVowel) {
+      $("#status").textContent = "YOUR SPIN IS FOR A CONSONANT";
+      return;
+    }
+
     const now = Date.now();
     if (lastLetterGuessMs && now - lastLetterGuessMs < 3000) {
       const wait = Math.ceil((3000 - (now - lastLetterGuessMs)) / 1000);
@@ -756,19 +957,39 @@ let cashOutReturnMode = null;
       soundTooFast();
       return;
     }
+
     lastLetterGuessMs = now;
     guessed.add(letter);
-    const letterCost = "AEIOU".includes(letter) ? 0.30 : 0.10;
-    value = Math.max(0, Math.round((value - letterCost) * 100) / 100);
-    $("#money").textContent = "$" + value.toFixed(2);
-    flashValue();
-    lastActionMs = Date.now();
-    $("#guessed").textContent = Array.from(guessed).join("  ");
-    renderAlphabet();
-    renderBoard(false);
-    const letterIsCorrect = current.answer.includes(letter);
-    $("#status").textContent = letterIsCorrect ? "✓ " + letter + " is in the puzzle" : "✕ No " + letter;
+    lastActionMs = now;
+    lastCountdownBeep = null;
+
+    const occurrences = Array.from(current.answer).filter(ch => ch === letter).length;
+    const letterIsCorrect = occurrences > 0;
+    const usedMode=letterMode;
+    const usedSpin=spinValue;
+
+    if (usedMode === "consonant" && letterIsCorrect) {
+      const won=Math.round(usedSpin*occurrences*100)/100;
+      value=Math.round((value+won)*100)/100;
+      $("#money").textContent="$"+value.toFixed(2);
+      flashValue();
+      $("#status").textContent="✓ " + letter + " × " + occurrences + " — WON $" + won.toFixed(2);
+    } else if (usedMode === "consonant") {
+      $("#status").textContent="✕ No " + letter + " — $0 LOST";
+    } else if (letterIsCorrect) {
+      $("#status").textContent="✓ " + letter + " is in the puzzle";
+    } else {
+      $("#status").textContent="✕ No " + letter + " — vowel purchase was 25¢";
+    }
+
     if (letterIsCorrect) soundCorrectLetter(); else soundWrongLetter();
+
+    letterMode=null;
+    spinValue=0;
+    $("#spinResult").textContent="—";
+    $("#guessed").textContent=Array.from(guessed).join("  ");
+    renderBoard(false);
+    updateWheelControls();
 
     const allLettersRevealed = Array.from(current.answer)
       .filter(ch => /[A-Z]/.test(ch))
@@ -776,6 +997,8 @@ let cashOutReturnMode = null;
 
     if (allLettersRevealed) {
       stopTimer();
+      $("#wheelControls").classList.add("hidden");
+      $("#status").textContent = "";
       soundSolve();
       mode = "result";
       $("#timers").classList.add("hidden");
@@ -812,9 +1035,6 @@ let cashOutReturnMode = null;
       return;
     }
 
-    if (value <= 0) {
-      timeUp("The puzzle value reached $0.");
-    }
   }
 
   function solveTimeUp() {
@@ -854,6 +1074,8 @@ let cashOutReturnMode = null;
     stopTimer();
     mode = "solve";
     $("#timers").classList.add("hidden");
+    $("#wheelControls").classList.add("hidden");
+    $("#status").textContent = "";
     $("#locked").textContent = "$" + value.toFixed(2);
     $("#solveTimer").textContent = "60";
     $("#solvePanel").classList.remove("hidden");
@@ -1004,6 +1226,8 @@ let cashOutReturnMode = null;
     if (cashOutReturnMode === "playing") {
       lastActionMs = Date.now();
       $("#timers").classList.remove("hidden");
+      $("#wheelControls").classList.remove("hidden");
+      updateWheelControls();
       clockTimer = setInterval(updateTimers, 250);
     }
   }
@@ -1113,6 +1337,11 @@ let cashOutReturnMode = null;
     if (isPractice) wireRealButton();
   });
 
+  $("#spinButton").addEventListener("click", spinWheel);
+  $("#cashOutButton").addEventListener("click", showCashOutConfirmation);
+  $("#solveButton").addEventListener("click", enterSolveMode);
+  $("#buyVowelButton").addEventListener("click", buyVowel);
+
   $("#keepPlaying").addEventListener("click", resumeAfterCashOutCancel);
 
   $("#confirmCashOut").addEventListener("click", () => {
@@ -1149,14 +1378,67 @@ let cashOutReturnMode = null;
     $("#realPassword").focus();
   });
 
-  $("#passwordForm").addEventListener("submit", (e) => {
+  function requestRealMoneyEntry(playerName) {
+    return new Promise((resolve, reject) => {
+      const callbackName = "__birthdayEntry_" + Date.now() + "_" + Math.floor(Math.random()*100000);
+      const tag = document.createElement("script");
+      const cleanup = () => {
+        try { delete window[callbackName]; } catch (_) {}
+        if (tag.parentNode) tag.parentNode.removeChild(tag);
+      };
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("Daily entry check timed out."));
+      }, 10000);
+
+      window[callbackName] = (data) => {
+        clearTimeout(timeout);
+        cleanup();
+        resolve(data || {});
+      };
+      tag.onerror = () => {
+        clearTimeout(timeout);
+        cleanup();
+        reject(new Error("Daily entry check failed."));
+      };
+      tag.src = WEB_APP_URL + "?action=claimRealMoneyEntry&player=" +
+        encodeURIComponent(playerName) + "&callback=" + encodeURIComponent(callbackName) +
+        "&_=" + Date.now();
+      document.head.appendChild(tag);
+    });
+  }
+
+  $("#passwordForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    if ($("#realPassword").value === "09282009") {
-      $("#passwordError").textContent = "";
-      beginRealGame();
-    } else {
+    if ($("#realPassword").value !== "09282009") {
       $("#passwordError").textContent = "Incorrect password.";
+      $("#realEntryStatus").textContent = "";
       $("#realPassword").select();
+      return;
+    }
+
+    $("#passwordError").textContent = "";
+    $("#realEntryStatus").textContent = "Checking Real Money entry...";
+    const submitButton = $("#passwordForm").querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+
+    try {
+      const result = await requestRealMoneyEntry(player || "Sam");
+      if (result.allowed === true) {
+        $("#realEntryStatus").textContent = "";
+        beginRealGame();
+      } else if (result.reason === "already_played_today") {
+        $("#realEntryStatus").textContent = "";
+        $("#passwordError").textContent = "REAL MONEY PLAY IS NOT AVAILABLE.";
+      } else {
+        throw new Error(result.error || "Unexpected response.");
+      }
+    } catch (err) {
+      console.error(err);
+      $("#realEntryStatus").textContent = "";
+      $("#passwordError").textContent = "Unable to verify Real Money play. Please try again.";
+    } finally {
+      if (submitButton) submitButton.disabled = false;
     }
   });
 
@@ -1168,10 +1450,16 @@ let cashOutReturnMode = null;
     }
     if (e.target && e.target.tagName === "INPUT") return;
     if (e.code === "Space") {
-      e.preventDefault();
-      if (mode === "waiting") startPuzzle();
-      else if (mode === "playing") enterSolveMode();
-      return;
+      if (mode === "waiting") {
+        e.preventDefault();
+        startPuzzle();
+        return;
+      }
+      if (mode === "playing" && spinAnimating) {
+        e.preventDefault();
+        spinStopRequested = true;
+        return;
+      }
     }
     if (mode === "playing" && /^[a-zA-Z]$/.test(e.key)) {
       e.preventDefault();
