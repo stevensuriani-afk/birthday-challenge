@@ -103,15 +103,14 @@ body::before{
   </div>
   <div style="max-width:690px;margin:0 auto;font-size:18px;line-height:1.6">
     <p>Each puzzle starts at <b>$0.00</b>. Build your winnings as you reveal letters.</p>
-    <p>For a <b>consonant</b>, click <b>SPIN</b>. The values keep spinning until you press <b>SPACE</b> to stop them, or they stop automatically after <b>30 seconds</b>. The spin can land on <b>25¢, 30¢, 50¢, 75¢, $1.00, $2.00, or 😈 BANKRUPT</b>. Then type or click one consonant. If it appears, you win the spun amount <b>for each occurrence</b>. A missed consonant costs nothing.</p>
+    <p>For a <b>consonant</b>, click <b>SPIN</b>. The values keep spinning until you press <b>SPACE</b> to stop them, or they stop automatically after <b>30 seconds</b>. The spin can land on <b>25¢, 30¢, 50¢, 75¢, 💰 $1.00, 🎂 $2.00, or 😈 BANKRUPT</b>. Then type or click one consonant. If it appears, you win the spun amount <b>for each occurrence</b>. A missed consonant costs nothing.</p>
+      <p><b>Five incorrect consonants ends the puzzle with $0 earned.</b></p>
     <p>To guess a <b>vowel</b>, click <b>BUY A VOWEL — 25¢</b>. You must have at least 25¢ in the current puzzle. The 25¢ is charged when you buy the vowel, whether or not the vowel is in the puzzle.</p>
     <p>After each consonant guess, spin again. After each vowel purchase, choose one vowel.</p>
     <p>You have <b>30 seconds between actions</b>.</p>
-    <p>You must wait at least <b>3 seconds between letter guesses</b>. Guessing too quickly triggers three warning beeps.</p>
     <p>Think you know it? Click <b>SOLVE</b>. Once you do, you have <b>60 seconds</b> to enter the full solution.</p>
     <p>If you reveal every letter, the puzzle is solved automatically.</p>
     <p><b>TEST MODE</b> works exactly like the real game, but the money doesn't count. Practice as long as you want. When you're ready, leave Test Mode and play for real birthday money.</p>
-    <p>During the real game, press <b>Ctrl + Shift + C</b> if you want to cash out your Birthday Bank and end the game.</p>
   </div>
   <div class="center space"><button id="beginPractice" class="btn" type="button">ENTER TEST MODE</button></div>
 </section>
@@ -160,6 +159,7 @@ body::before{
     <div id="board" class="board"></div>
     <div id="startPrompt" class="prompt"><div class="pulse">PRESS SPACE TO START</div><div id="startSub" class="muted"></div></div>
     <div style="text-align:center;margin-top:12px"><span class="muted">Guessed: </span><b id="guessed">—</b></div>
+    <div style="text-align:center;margin-top:6px"><span class="muted">Missed consonants: </span><b id="missedConsonants">0 / 5</b></div>
     <div id="wheelControls" class="hidden" style="margin:16px 0 4px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap">
       <button id="spinButton" class="btn" type="button">🎡 SPIN</button>
       <div id="spinResult" style="width:190px;min-width:190px;text-align:center;font-size:22px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap">—</div>
@@ -597,6 +597,7 @@ let cashOutReturnMode = null;
   let puzzleStartedMs = 0;
   let lastActionMs = 0;
   let lastLetterGuessMs = 0;
+  let missedConsonants = 0;
   let solveStartedMs = 0;
   let letterMode = null;       // null, "consonant", or "vowel"
   let spinValue = 0;
@@ -826,6 +827,8 @@ let cashOutReturnMode = null;
     }
     value = 0;
     guessed = new Set();
+    missedConsonants = 0;
+    $("#missedConsonants").textContent = "0 / 5";
     letterMode = null;
     spinValue = 0;
     spinAnimating = false;
@@ -951,13 +954,6 @@ let cashOutReturnMode = null;
     }
 
     const now = Date.now();
-    if (lastLetterGuessMs && now - lastLetterGuessMs < 3000) {
-      const wait = Math.ceil((3000 - (now - lastLetterGuessMs)) / 1000);
-      $("#status").textContent = "WAIT " + wait + " SECOND" + (wait === 1 ? "" : "S") + " BEFORE GUESSING AGAIN";
-      soundTooFast();
-      return;
-    }
-
     lastLetterGuessMs = now;
     guessed.add(letter);
     lastActionMs = now;
@@ -975,7 +971,9 @@ let cashOutReturnMode = null;
       flashValue();
       $("#status").textContent="✓ " + letter + " × " + occurrences + " — WON $" + won.toFixed(2);
     } else if (usedMode === "consonant") {
-      $("#status").textContent="✕ No " + letter + " — $0 LOST";
+      missedConsonants += 1;
+      $("#missedConsonants").textContent = missedConsonants + " / 5";
+      $("#status").textContent="✕ No " + letter + " — MISSED CONSONANT " + missedConsonants + " OF 5";
     } else if (letterIsCorrect) {
       $("#status").textContent="✓ " + letter + " is in the puzzle";
     } else {
@@ -983,6 +981,51 @@ let cashOutReturnMode = null;
     }
 
     if (letterIsCorrect) soundCorrectLetter(); else soundWrongLetter();
+
+    if (usedMode === "consonant" && !letterIsCorrect && missedConsonants >= 5) {
+      stopTimer();
+      mode = "result";
+      value = 0;
+      $("#money").textContent = "$0.00";
+      $("#wheelControls").classList.add("hidden");
+      $("#timers").classList.add("hidden");
+      $("#spinResult").textContent = "—";
+      $("#guessed").textContent = Array.from(guessed).join("  ");
+      renderBoard(true);
+
+      if (isPractice) {
+        showResult(
+          '<div style="font-size:40px">✕</div><h2>PUZZLE OVER</h2>' +
+          '<p><b>You reached 5 incorrect consonants.</b></p>' +
+          '<p>This puzzle ends with <b>$0 earned</b>.</p>' +
+          '<p>The answer was: <b>' + current.answer + '</b></p>' +
+          '<button id="nextButton" class="btn" type="button">ANOTHER TEST PUZZLE</button> ' +
+          '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
+        );
+      } else {
+        showResult(
+          '<div style="font-size:40px">✕</div><h2>PUZZLE OVER</h2>' +
+          '<p><b>You reached 5 incorrect consonants.</b></p>' +
+          '<p>This puzzle ends with <b>$0 earned</b>.</p>' +
+          '<p>The answer was: <b>' + current.answer + '</b></p>' +
+          '<p>Birthday Bank: <b>$' + bank.toFixed(2) + '</b></p>' +
+          '<button id="nextButton" class="btn" type="button">NEXT PUZZLE</button> ' +
+          '<button id="resultCashOutButton" class="btn" type="button">CASH OUT</button>'
+        );
+      }
+
+      $("#nextButton").addEventListener("click", () => {
+        if (isPractice) loadPuzzle(true);
+        else loadPuzzle(false);
+      });
+      if (isPractice) {
+        wireRealButton();
+      } else {
+        const resultCashOutButton = $("#resultCashOutButton");
+        if (resultCashOutButton) resultCashOutButton.addEventListener("click", showCashOutConfirmation);
+      }
+      return;
+    }
 
     letterMode=null;
     spinValue=0;
@@ -1314,14 +1357,16 @@ let cashOutReturnMode = null;
         '<div style="font-size:40px">🎉</div><h2>CORRECT!</h2>' +
         "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
         "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
-        nextButton(done ? "CONTINUE" : "NEXT PUZZLE")
+        nextButton(done ? "CONTINUE" : "NEXT PUZZLE") +
+        ' <button id="resultCashOutButton" class="btn" type="button">CASH OUT</button>'
       );
     } else {
       showResult(
         '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2>' +
         "<p>The answer was <b>" + current.answer + "</b>.</p>" +
         "<p>$0 banked. Birthday Bank stays at <b>$" + bank + "</b>.</p>" +
-        nextButton("NEXT PUZZLE")
+        nextButton("NEXT PUZZLE") +
+        ' <button id="resultCashOutButton" class="btn" type="button">CASH OUT</button>'
       );
     }
 
@@ -1334,7 +1379,12 @@ let cashOutReturnMode = null;
         loadPuzzle(false);
       }
     });
-    if (isPractice) wireRealButton();
+    if (isPractice) {
+      wireRealButton();
+    } else {
+      const resultCashOutButton = $("#resultCashOutButton");
+      if (resultCashOutButton) resultCashOutButton.addEventListener("click", showCashOutConfirmation);
+    }
   });
 
   $("#spinButton").addEventListener("click", spinWheel);
