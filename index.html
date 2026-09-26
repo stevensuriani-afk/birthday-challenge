@@ -131,7 +131,7 @@ body::before{
   <div style="max-width:650px;margin:0 auto;font-size:20px;line-height:1.55">
     <p>Once you choose to play for real, <b>you can't go back to Test Mode.</b></p>
     <p>The puzzles you play next will determine <b>how much birthday money you win.</b></p>
-    <p><b>Once you start, you can play until you cash out. Other people can even play in your place if you want. But once you click CASH OUT, that's it.</b></p>
+    <p><b>Once you start, you can play until you cash out. Other people can even play in your place if you want. But once you click CASH OUT, you will not be able to play again for real money.</b></p>
     <p>Practice as much as you want before continuing.</p>
   </div>
   <div class="space" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -184,7 +184,7 @@ body::before{
       <div class="label">LOCKED IN FOR</div><div id="locked" style="font-size:38px;font-weight:900">$0</div>
       <div style="margin:10px 0 14px;font-size:18px;font-weight:800">TIME TO SOLVE: <span id="solveTimer">60</span>s</div>
       <form id="solveForm">
-        <input id="solution" class="input" autocomplete="off" placeholder="Type the complete answer">
+        <input id="solution" class="input" autocomplete="off" placeholder="Type the complete answer" style="text-transform:uppercase">
         <button class="btn" type="submit">SUBMIT ANSWER</button>
       </form>
     </div>
@@ -196,7 +196,7 @@ body::before{
 (function () {
   "use strict";
 
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxfdGabHVmtFi64L2DGITIogP9uiYRXWs_mpU1cTm5o7-Zw3om3pHtV2jrSfXmRLbS2cw/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbydAoei5qLaRW58kzW3fTY_JAd1hnqJa3cIwfQ4GCJjk5og4gM6nM4zZ4m1nH_bzlSNPQ/exec";
   let soundOn = true;
   let audioCtx = null;
   let lastCountdownBeep = null;
@@ -370,7 +370,65 @@ body::before{
     { clue: "PHRASE", answer: "EASIER SAID THAN DONE", difficulty: "medium" },
     { clue: "PHRASE", answer: "IT'S NOT ROCKET SCIENCE", difficulty: "medium" },
     { clue: "PHRASE", answer: "THAT'S WHAT I'M TALKING ABOUT", difficulty: "medium" },
-    { clue: "PHRASE", answer: "KEEP YOUR EYES ON THE ROAD", difficulty: "medium" },
+    { clue: "WEATHER FORECAST", answer: "CLOUDY WITH SHOWERS", difficulty: "medium" },
+{ clue: "WEATHER FORECAST", answer: "DENSE MORNING FOG", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "BUILDING A SANDCASTLE", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "RIDING THE WAVES", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "THROWING A FRISBEE", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "COLLECTING SEASHELLS", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "DIGGING IN THE SAND", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "LOOKING FOR SEASHELLS", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "PLAYING IN THE WAVES", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "FLYING A KITE", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "BURYING SOMEONE IN THE SAND", difficulty: "medium" },
+{ clue: "HAVING FUN AT THE BEACH", answer: "WATCHING THE SUNSET", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT PERIOD DO YOU HAVE LUNCH", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "DID WE HAVE HOMEWORK", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT DID I MISS YESTERDAY", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHEN IS THIS DUE", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "MY SPIDER SENSE IS TINGLING", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "WITH GREAT POWER COMES GREAT RESPONSIBILITY", difficulty: "hard" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "I AM BATMAN", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "TO THE BATMOBILE", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "UP UP AND AWAY", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "TRUTH JUSTICE AND A BETTER TOMORROW", difficulty: "hard" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "HULK SMASH", difficulty: "medium" },
+{ clue: "FAMOUS SUPERHERO PHRASES", answer: "AVENGERS ASSEMBLE", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "IS THIS GOING TO BE ON THE TEST", difficulty: "hard" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT PAGE ARE WE ON", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "CAN I COPY YOUR NOTES", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "THE BELL IS ABOUT TO RING", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT DID YOU GET FOR NUMBER FIVE", difficulty: "hard" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "DID YOU STUDY FOR THE TEST", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "I LEFT IT IN MY LOCKER", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT TIME DOES PRACTICE START", difficulty: "hard" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHO DO YOU HAVE FOR MATH", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "ARE YOU GOING TO THE GAME", difficulty: "medium" },
+{ clue: "OVERHEARD AT HIGH SCHOOL", answer: "WHAT ARE THEY SERVING FOR LUNCH", difficulty: "hard" },
+{ clue: "WEATHER FORECAST", answer: "RECORD HIGH TEMPERATURES", difficulty: "hard" },
+{ clue: "WEATHER FORECAST", answer: "BELOW NORMAL TEMPERATURES", difficulty: "hard" },
+{ clue: "WEATHER FORECAST", answer: "CLEARING BY AFTERNOON", difficulty: "hard" },
+{ clue: "WEATHER FORECAST", answer: "RAIN ENDING OVERNIGHT", difficulty: "medium" },
+{ clue: "WEATHER FORECAST", answer: "PARTLY CLOUDY WITH A CHANCE OF RAIN", difficulty: "medium" },
+{ clue: "WEATHER FORECAST", answer: "SCATTERED SHOWERS AND THUNDERSTORMS", difficulty: "hard" },
+{ clue: "NURSERY RHYME", answer: "THERE WAS AN OLD WOMAN WHO LIVED IN A SHOE", difficulty: "hard" },
+{ clue: "NURSERY RHYME", answer: "HUMPTY DUMPTY SAT ON A WALL", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "JACK AND JILL WENT UP THE HILL", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "TWINKLE TWINKLE LITTLE STAR", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "MARY HAD A LITTLE LAMB", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "LITTLE MISS MUFFET SAT ON A TUFFET", difficulty: "hard" },
+{ clue: "NURSERY RHYME", answer: "HICKORY DICKORY DOCK", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "HEY DIDDLE DIDDLE", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "ROCK A BYE BABY", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "ROW ROW ROW YOUR BOAT", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "THE ITSY BITSY SPIDER", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "OLD MACDONALD HAD A FARM", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "LONDON BRIDGE IS FALLING DOWN", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "RING AROUND THE ROSIE", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "ONE TWO BUCKLE MY SHOE", difficulty: "medium" },
+{ clue: "NURSERY RHYME", answer: "PETER PETER PUMPKIN EATER", difficulty: "hard" },
+{ clue: "NURSERY RHYME", answer: "THIS LITTLE PIGGY WENT TO MARKET", difficulty: "hard" },
+{ clue: "PHRASE", answer: "KEEP YOUR EYES ON THE ROAD", difficulty: "hard" },
     { clue: "PHRASE", answer: "YOU'VE GOT TO BE KIDDING ME", difficulty: "medium" },
     { clue: "PHRASE", answer: "YOU ONLY LIVE ONCE", difficulty: "medium" },
     { clue: "PHRASE", answer: "A PICTURE IS WORTH A THOUSAND WORDS", difficulty: "medium" },
@@ -501,6 +559,28 @@ body::before{
 { clue: "THINGS PARENTS SAY", answer: "DID YOU DO YOUR HOMEWORK", difficulty: "medium" },
 { clue: "THINGS PARENTS SAY", answer: "MONEY DOESNT GROW ON TREES", difficulty: "medium" },
 { clue: "THINGS PARENTS SAY", answer: "BECAUSE I SAID SO", difficulty: "medium" },
+{ clue: "WHAT ARE YOU DOING?", answer: "LOOKING FOR MY CAR KEYS", difficulty: "hard" },
+{ clue: "WHAT ARE YOU DOING?", answer: "DRIVING WITH THE WINDOWS DOWN", difficulty: "hard" },
+{ clue: "WHAT ARE YOU DOING?", answer: "STAYING UP WAY TOO LATE", difficulty: "hard" },
+{ clue: "WHAT ARE YOU DOING?", answer: "SCROLLING THROUGH SOCIAL MEDIA", difficulty: "hard" },
+{ clue: "WHAT ARE YOU DOING?", answer: "LOOKING FOR A PARKING SPACE", difficulty: "hard" },
+{ clue: "WHAT ARE YOU DOING?", answer: "GETTING READY FOR WORK", difficulty: "hard" },
+{ clue: "THINGS PARENTS SAY", answer: "HOW MANY TIMES DO I HAVE TO TELL YOU", difficulty: "hard" },
+{ clue: "THINGS PARENTS SAY", answer: "WERE YOU RAISED IN A BARN", difficulty: "hard" },
+{ clue: "THINGS PARENTS SAY", answer: "TURN OFF THE LIGHTS WHEN YOU LEAVE", difficulty: "hard" },
+{ clue: "THINGS PARENTS SAY", answer: "DO NOT MAKE ME COME UP THERE", difficulty: "hard" },
+{ clue: "THINGS PARENTS SAY", answer: "YOU WILL THANK ME SOMEDAY", difficulty: "hard" },
+{ clue: "THINGS TEENAGERS SAY", answer: "I WAS JUST ABOUT TO DO THAT", difficulty: "hard" },
+{ clue: "THINGS TEENAGERS SAY", answer: "WHY DO I HAVE TO DO EVERYTHING", difficulty: "hard" },
+{ clue: "THINGS TEENAGERS SAY", answer: "EVERYONE ELSE IS ALLOWED TO GO", difficulty: "hard" },
+{ clue: "THINGS TEENAGERS SAY", answer: "I DID NOT HEAR YOU", difficulty: "hard" },
+{ clue: "THINGS TEENAGERS SAY", answer: "GIVE ME FIVE MORE MINUTES", difficulty: "hard" },
+{ clue: "PHRASE", answer: "DO NOT TRY THIS AT HOME", difficulty: "hard" },
+{ clue: "PHRASE", answer: "IT SEEMED LIKE A GOOD IDEA", difficulty: "hard" },
+{ clue: "PHRASE", answer: "WHAT COULD POSSIBLY GO WRONG", difficulty: "hard" },
+{ clue: "PHRASE", answer: "I HAVE A BAD FEELING ABOUT THIS", difficulty: "hard" },
+{ clue: "PHRASE", answer: "THAT WAS CLOSER THAN I THOUGHT", difficulty: "hard" },
+{ clue: "PHRASE", answer: "YOU HAVE GOT TO BE KIDDING ME", difficulty: "hard" },
 { clue: "SPORTS TEAMS", answer: "NEW ENGLAND PATRIOTS", difficulty: "medium" },
 { clue: "SPORTS TEAMS", answer: "NEW YORK GIANTS", difficulty: "medium" },
 { clue: "SPORTS TEAMS", answer: "DALLAS COWBOYS", difficulty: "medium" },
@@ -565,9 +645,9 @@ body::before{
     { clue: "WHAT ARE YOU DOING?", answer: "MAKING A PLAYLIST", difficulty: "medium" },
     { clue: "WHAT ARE YOU DOING?", answer: "CLEANING MY ROOM", difficulty: "medium" },
     { clue: "WHAT ARE YOU DOING?", answer: "PACKING FOR VACATION", difficulty: "medium" },
-    { clue: "WHAT ARE YOU DOING?", answer: "WAITING FOR THE WEEKEND", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "WAITING FOR THE WEEKEND", difficulty: "hard" },
     { clue: "WHAT ARE YOU DOING?", answer: "LOOKING FOR MY KEYS", difficulty: "medium" },
-    { clue: "WHAT ARE YOU DOING?", answer: "CHARGING MY PHONE", difficulty: "medium" },
+    { clue: "WHAT ARE YOU DOING?", answer: "CHARGING MY PHONE", difficulty: "hard" },
     { clue: "WHAT ARE YOU DOING?", answer: "GETTING READY FOR SCHOOL", difficulty: "medium" },
     { clue: "WHAT ARE YOU DOING?", answer: "WATCHING THE BIG GAME", difficulty: "medium" },
     { clue: "WHAT ARE YOU DOING?", answer: "MAKING DINNER", difficulty: "medium" },
@@ -614,7 +694,10 @@ body::before{
     { clue: "PERSON", answer: "FAMILY FRIEND", difficulty: "medium" },
     { clue: "PERSON", answer: "OLDER COUSIN", difficulty: "medium" }
   ];
-  const allPuzzles = [...easyPuzzles, ...mediumPuzzles];
+  const hardPuzzles = mediumPuzzles.filter(p => p.difficulty === "hard");
+  // Keep the normal Medium pool strictly Medium now that Hard puzzles exist.
+  const normalMediumPuzzles = mediumPuzzles.filter(p => p.difficulty === "medium");
+  const allPuzzles = [...easyPuzzles, ...normalMediumPuzzles, ...hardPuzzles];
 
   const $ = (s) => document.querySelector(s);
   let player = "";
@@ -627,6 +710,8 @@ let cashOutReturnMode = null;
   let testPool = [];
   let realEasyPool = [];
   let realMediumPool = [];
+  let realHardPool = [];
+  let recentRealPuzzleEarnings = [];
   const seenAnswers = new Set();
 
   function shuffled(items) {
@@ -639,18 +724,39 @@ let cashOutReturnMode = null;
   }
 
   function takeUnseen(poolName) {
-    let pool = poolName === "test" ? testPool : (poolName === "easy" ? realEasyPool : realMediumPool);
-    const source = poolName === "test" ? allPuzzles : (poolName === "easy" ? easyPuzzles : mediumPuzzles);
+    let pool = poolName === "test" ? testPool
+      : poolName === "easy" ? realEasyPool
+      : poolName === "hard" ? realHardPool
+      : realMediumPool;
+    const source = poolName === "test" ? allPuzzles
+      : poolName === "easy" ? easyPuzzles
+      : poolName === "hard" ? hardPuzzles
+      : normalMediumPuzzles;
     if (!pool.length) {
       pool = shuffled(source.filter(p => !seenAnswers.has(p.answer)));
       if (!pool.length) pool = shuffled(source);
       if (poolName === "test") testPool = pool;
       else if (poolName === "easy") realEasyPool = pool;
+      else if (poolName === "hard") realHardPool = pool;
       else realMediumPool = pool;
     }
     const puzzle = pool.pop();
     seenAnswers.add(puzzle.answer);
     return puzzle;
+  }
+
+  function recordRealPuzzleEarnings(amount) {
+    if (isPractice) return;
+    recentRealPuzzleEarnings.push(Math.max(0, Math.round(amount * 100) / 100));
+    if (recentRealPuzzleEarnings.length > 3) recentRealPuzzleEarnings.shift();
+  }
+
+  function nextRealPuzzleShouldBeHard() {
+    if (!recentRealPuzzleEarnings.length) return false;
+    const last = recentRealPuzzleEarnings[recentRealPuzzleEarnings.length - 1];
+    if (last >= 5) return true;
+    return recentRealPuzzleEarnings.length === 3 &&
+      Math.round(recentRealPuzzleEarnings.reduce((sum, n) => sum + n, 0) * 100) >= 1000;
   }
   let current = null;
   let isPractice = true;
@@ -895,15 +1001,69 @@ let cashOutReturnMode = null;
     updateWheelControls();
   }
 
-  function loadPuzzle(practiceMode) {
+  async function loadPuzzle(practiceMode) {
     stopTimer();
     isPractice = practiceMode;
-    if (practiceMode) {
-      current = takeUnseen("test");
-    } else {
-      realRound += 1;
-      current = realRound === 1 ? takeUnseen("easy") : takeUnseen("medium");
+
+    const poolName = practiceMode
+      ? "test"
+      : (realRound === 0 ? "easy" : (nextRealPuzzleShouldBeHard() ? "hard" : "medium"));
+
+    if (!practiceMode) realRound += 1;
+
+    current = null;
+
+    // Show the game immediately while the Played Puzzles sheet is checked.
+    $("#game").classList.remove("hidden");
+    $("#startPrompt").classList.add("hidden");
+    $("#timers").classList.add("hidden");
+    $("#wheelControls").classList.add("hidden");
+    $("#solvePanel").classList.add("hidden");
+    $("#result").classList.add("hidden");
+    $("#roundLabel").textContent = practiceMode ? "TEST MODE — WINNINGS DO NOT COUNT" : "BIRTHDAY MONEY ROUND";
+    $("#clue").textContent = "";
+    $("#money").textContent = "$0.00";
+    $("#guessed").textContent = "—";
+    $("#status").textContent = "CHOOSING AN UNUSED PUZZLE...";
+
+    // A puzzle is not shown until the Apps Script confirms it is not already listed.
+    // If it was already played, try another puzzle from the same pool.
+    const source = poolName === "test" ? allPuzzles
+      : poolName === "easy" ? easyPuzzles
+      : poolName === "hard" ? hardPuzzles
+      : normalMediumPuzzles;
+
+    const candidates = shuffled(source.filter(p => !seenAnswers.has(p.answer)));
+
+    for (const candidate of candidates) {
+      seenAnswers.add(candidate.answer);
+      let claim;
+      try {
+        claim = await claimPlayedPuzzle(candidate, practiceMode ? "TEST" : "REAL", player);
+      } catch (err) {
+        console.error("Puzzle history check failed:", err);
+        $("#status").textContent = "UNABLE TO CHECK PUZZLE HISTORY. PLEASE TRY AGAIN.";
+        return;
+      }
+      if (claim && claim.error) {
+        console.error("Puzzle history service error:", claim.error);
+        $("#status").textContent = "PUZZLE HISTORY IS NOT READY. UPDATE THE GOOGLE APPS SCRIPT AND TRY AGAIN.";
+        return;
+      }
+      if (claim.allowed === true) {
+        current = candidate;
+        break;
+      }
     }
+
+    if (!current) {
+      $("#status").textContent = "NO UNUSED PUZZLES ARE AVAILABLE.";
+      $("#spin").disabled = true;
+      $("#buyVowel").disabled = true;
+      $("#solve").disabled = true;
+      return;
+    }
+
     value = 0;
     guessed = new Set();
     missedConsonants = 0;
@@ -954,6 +1114,7 @@ let cashOutReturnMode = null;
     soundTimeout();
     mode = "result";
     value = 0;
+    if (!isPractice) recordRealPuzzleEarnings(0);
     $("#money").textContent = "$0.00";
     $("#timers").classList.add("hidden");
     $("#wheelControls").classList.add("hidden");
@@ -1173,6 +1334,7 @@ let cashOutReturnMode = null;
           '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
         );
       } else {
+        recordRealPuzzleEarnings(value);
         bank += value;
         solved += 1;
         updateHeader();
@@ -1183,7 +1345,7 @@ let cashOutReturnMode = null;
           "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
           "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
           (done
-            ? '<p><b>The bank has run out of money, you must cash out now.</b></p><button id="mandatoryCashOutButton" class="btn" type="button">CASH OUT</button>'
+            ? '<p><b>The bank has run out of money, you must cash out now. We hope you enjoyed this game.</b></p><button id="mandatoryCashOutButton" class="btn" type="button">CASH OUT</button>'
             : nextButton("NEXT PUZZLE"))
         );
       }
@@ -1210,6 +1372,7 @@ let cashOutReturnMode = null;
     stopTimer();
     soundTimeout();
     mode = "result";
+    if (!isPractice) recordRealPuzzleEarnings(0);
     $("#solvePanel").classList.add("hidden");
     renderBoard(true);
     showResult(
@@ -1450,6 +1613,10 @@ let cashOutReturnMode = null;
     loadPuzzle(true);
   });
 
+  $("#solution").addEventListener("input", (e) => {
+    e.target.value = e.target.value.toUpperCase();
+  });
+
   $("#solveForm").addEventListener("submit", (e) => {
     e.preventDefault();
     if (mode !== "solve") return;
@@ -1470,6 +1637,7 @@ let cashOutReturnMode = null;
         '<button id="realButton" class="btn" type="button">PLAY FOR REAL MONEY</button>'
       );
     } else if (correct) {
+      recordRealPuzzleEarnings(value);
       bank += value;
       solved += 1;
       updateHeader();
@@ -1479,10 +1647,11 @@ let cashOutReturnMode = null;
         "<p>You banked <b>$" + value.toFixed(2) + "</b>.</p>" +
         "<p>Birthday Bank: <b>$" + bank.toFixed(2) + "</b></p>" +
         (done
-          ? '<p><b>The bank has run out of money, you must cash out now.</b></p><button id="mandatoryCashOutButton" class="btn" type="button">CASH OUT</button>'
+          ? '<p><b>The bank has run out of money, you must cash out now. We hope you enjoyed this game.</b></p><button id="mandatoryCashOutButton" class="btn" type="button">CASH OUT</button>'
           : nextButton("NEXT PUZZLE") + ' <button id="resultCashOutButton" class="btn" type="button">CASH OUT</button>')
       );
     } else {
+      recordRealPuzzleEarnings(0);
       showResult(
         '<div style="font-size:40px">❌</div><h2>NOT QUITE</h2>' +
         "<p>The answer was <b>" + current.answer + "</b>.</p>" +
@@ -1542,6 +1711,7 @@ let cashOutReturnMode = null;
     attempted = 0;
     solved = 0;
     realRound = 0;
+    recentRealPuzzleEarnings = [];
     updateHeader();
     loadPuzzle(false);
   }
@@ -1552,6 +1722,43 @@ let cashOutReturnMode = null;
     $("#realPassword").value = "";
     $("#realPassword").focus();
   });
+
+  function claimPlayedPuzzle(puzzle, playMode, playerName) {
+    return new Promise((resolve, reject) => {
+      const callbackName = "__birthdayPuzzle_" + Date.now() + "_" + Math.floor(Math.random()*100000);
+      const tag = document.createElement("script");
+      const cleanup = () => {
+        try { delete window[callbackName]; } catch (_) {}
+        if (tag.parentNode) tag.parentNode.removeChild(tag);
+      };
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("Puzzle history check timed out."));
+      }, 10000);
+
+      window[callbackName] = (data) => {
+        clearTimeout(timeout);
+        cleanup();
+        resolve(data || {});
+      };
+      tag.onerror = () => {
+        clearTimeout(timeout);
+        cleanup();
+        reject(new Error("Puzzle history check failed."));
+      };
+
+      tag.src = WEB_APP_URL +
+        "?action=claimPuzzle" +
+        "&answer=" + encodeURIComponent(puzzle.answer) +
+        "&clue=" + encodeURIComponent(puzzle.clue) +
+        "&mode=" + encodeURIComponent(playMode) +
+        "&player=" + encodeURIComponent(playerName || "") +
+        "&callback=" + encodeURIComponent(callbackName) +
+        "&_=" + Date.now();
+
+      document.head.appendChild(tag);
+    });
+  }
 
   function requestRealMoneyEntry(playerName) {
     return new Promise((resolve, reject) => {
